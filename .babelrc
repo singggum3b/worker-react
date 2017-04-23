@@ -1,0 +1,14 @@
+{
+  "presets": [
+    "react",
+    ["env", {
+      "targets": {
+        "browsers": ["last 2 versions", "safari >= 9", "not ie <= 11"]
+      },
+      "modules": false,
+      "includes": ["transform-object-rest-spread"],
+      "useBuiltIns": true
+    }]
+  ],
+  "plugins": ["transform-object-rest-spread"]
+}
