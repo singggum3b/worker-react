@@ -1,7 +1,7 @@
 
-export function updateFinishedTask(taskNumber) {
+export function updateFinishedTask(data) {
     return {
         type: "FINISHED_TASK",
-        taskNumber,
+        data,
     }
 }

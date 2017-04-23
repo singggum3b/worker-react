@@ -8,14 +8,11 @@ self.onmessage = function ({ data }) {
     const { api_name, ...rest } = data;
     match(api_name, {
         [API.API_CONST.INIT]: () => {
-            console.log("initialize");
             store.subscribe(() => {
                 const state = store.getState();
-                postMessage({
-                    api_name: API.API_CONST.STORE_UPDATE,
-                    state: state,
-                });
-            })
+                outStoreUpdate(state);
+            });
+            outInitDone(store.getState());
         },
         [API.API_CONST.STORE_DISPATCH]: () => {
             store.dispatch(rest);
@@ -25,3 +22,17 @@ self.onmessage = function ({ data }) {
         console.error("api_name is required");
     });
 };
+
+function outInitDone(state) {
+    postMessage({
+        api_name: API.API_CONST.INIT_DONE,
+        state: state,
+    });
+}
+
+function outStoreUpdate(state) {
+    postMessage({
+        api_name: API.API_CONST.STORE_UPDATE,
+        state: state,
+    });
+}

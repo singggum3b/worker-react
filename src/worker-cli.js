@@ -1,8 +1,9 @@
 import * as API from "./worker/worker-api";
 
 function handleInitDone(resolve) {
-    return ({ data, ...rest }) => {
-        if (data.api_name === API.API_CONST.INIT_DONE) {
+    return ({ data }) => {
+        const { api_name, ...rest } = data;
+        if (api_name === API.API_CONST.INIT_DONE) {
             resolve(rest);
         }
     }
@@ -40,7 +41,6 @@ export default function WorkerCLI(worker) {
                     }
                 });
                 return () => {
-
                 }
             },
             getState() {

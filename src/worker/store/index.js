@@ -3,13 +3,13 @@ import createSagaMiddleware from "redux-saga";
 
 import mySaga from "./my-saga";
 
-const reducer = function (state = { finishedTask: 0 }, action) {
+const reducer = function (state = { finishedTask: 0, data: [] }, action) {
     switch (action.type) {
         case "FINISHED_TASK":
-            console.log("Worker A has done his task: ", action.taskNumber);
+            console.log("Worker A has done his task: ");
             return {
                 ...state,
-                finishedTask: state.finishedTask + 1,
+                data: action.data,
             };
             break;
         default:

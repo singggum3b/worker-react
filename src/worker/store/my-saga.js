@@ -4,13 +4,9 @@ import { delay } from "redux-saga";
 import { updateFinishedTask } from './action';
 
 function* workerA(task) {
-    console.log("Some one asked workerA to do task : ", task);
-    console.log("Doing...");
-    // Worker a take 2 second to finish a single given task
-    // He's occupied during this time
-    yield delay(2000, null);
-    // He update the number of finished task to the store
-    yield put(updateFinishedTask(task.taskNumber));
+    const response = yield self.fetch("/BRDRestService/BRDRestService.svc/GetAllBus");
+    const data = yield response.json();
+    yield put(updateFinishedTask(data));
     return "Result of the task";
 }
 
