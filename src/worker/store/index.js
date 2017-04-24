@@ -1,5 +1,6 @@
 import { createStore, applyMiddleware, combineReducers } from "redux";
 import createSagaMiddleware from "redux-saga";
+import { composeWithDevTools } from "remote-redux-devtools";
 
 import mySaga from "./my-saga";
 
@@ -24,7 +25,9 @@ const store = createStore(
     combineReducers({
         store: reducer,
     }),
-    applyMiddleware(sagaMiddleware)
+    composeWithDevTools(
+        applyMiddleware(sagaMiddleware),
+    ),
 );
 
 // then run the saga

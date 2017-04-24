@@ -1,4 +1,5 @@
 import "babel-polyfill";
+import "whatwg-fetch";
 import { match } from "toolbelt/common.belt";
 
 import * as API from "./worker-api";

@@ -17,6 +17,7 @@
     "react-redux": "^5.0.4",
     "redux": "^3.6.0",
     "redux-saga": "^0.14.7",
+    "remote-redux-devtools": "^0.5.7",
     "toolbelt": "https://github.com/singggum3b/toolbelt.git",
     "webpack": "^2.4.1",
     "webpack-dev-server": "2.4.2",
@@ -24,6 +25,7 @@
     "worker-loader": "^0.8.0"
   },
   "scripts": {
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "prod": "webpack -p"
   }
 }

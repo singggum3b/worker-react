@@ -4,6 +4,7 @@ import { delay } from "redux-saga";
 import { updateFinishedTask } from './action';
 
 function* workerA(task) {
+    console.log(self.fetch);
     const response = yield self.fetch("/BRDRestService/BRDRestService.svc/GetAllBus");
     const data = yield response.json();
     yield put(updateFinishedTask(data));
