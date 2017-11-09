@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
+import styles from './counter.styl';
 
-function Counter({ data = [] }) {
+function Counter({ data = [], className, defaultClassName }) {
     return (
-        <ul>
+        <ul className={defaultClassName + " " + (className || "")}>
             {
                 data.map((item) => {
                     return (
@@ -18,6 +19,10 @@ function Counter({ data = [] }) {
         </ul>
     )
 }
+
+Counter.defaultProps = {
+  defaultClassName: styles.counter,
+};
 
 export default connect((state) => {
     return {
