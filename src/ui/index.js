@@ -1,18 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
-
-import { Provider } from "react-redux";
+import { observer } from 'mobx-react';
 
 import Counter from "./components/counter";
 
 export default function UI({ store }) {
     ReactDOM.render(<App store={store} />, document.getElementById("app"))
 }
-
-function App({ store }) {
+const App = observer(({ store }) => {
     return (
-        <Provider store={store}>
-            <Counter />
-        </Provider>
+        <Counter data={store.data} />
     )
-}
+});

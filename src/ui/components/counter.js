@@ -1,8 +1,9 @@
 import React from "react";
-import { connect } from "react-redux";
+import { observer } from 'mobx-react';
+
 import styles from './counter.styl';
 
-function Counter({ data = [], className, defaultClassName }) {
+const Counter = observer(({ data = [], className, defaultClassName }) => {
     return (
         <ul className={defaultClassName + " " + (className || "")}>
             {
@@ -18,14 +19,10 @@ function Counter({ data = [], className, defaultClassName }) {
             }
         </ul>
     )
-}
+});
 
 Counter.defaultProps = {
   defaultClassName: styles.counter,
 };
 
-export default connect((state) => {
-    return {
-        data: state.store.data,
-    }
-})(Counter)
+export default Counter;
