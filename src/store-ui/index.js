@@ -1,5 +1,4 @@
-import { observable } from 'mobx';
-import Trip from '../store-domain/trip.class';
+import TripStore from '../store-domain/trip.store'
 
 export default class IndexStore {
     tripStore;
@@ -9,23 +8,4 @@ export default class IndexStore {
         this.tripStore = new TripStore(this, dispatch);
     }
 
-}
-
-class TripStore {
-    indexStore;
-    dispatch;
-    @observable tripList = [];
-
-    constructor(indexStore, dispatch) {
-        this.indexStore = indexStore;
-        this.dispatch = dispatch;
-    }
-
-    loadTripList() {
-        this.dispatch("LOAD_TRIPS");
-    }
-
-    tripListFromJSON(jsonTripList) {
-        this.tripList = jsonTripList.map((item) => new Trip(item));
-    }
 }

@@ -9,6 +9,6 @@ export default function UI({ store }) {
 }
 const App = observer(({ store }) => {
     return (
-        <Counter data={store.data} />
+        <Counter data={store.tripStore.tripList} />
     )
 });
