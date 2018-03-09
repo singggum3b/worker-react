@@ -1,30 +1,32 @@
 import { runSaga, eventChannel } from 'redux-saga'
 import { spawn } from 'redux-saga/effects';
+import { emitter } from "redux-saga/lib/internal/channel";
 import tripSaga from './trip-saga';
+import todoSaga from './todo-saga';
 
 function* saga() {
-    yield spawn(tripSaga);
+    try {
+        yield spawn(tripSaga);
+        yield spawn(todoSaga);
+    } catch (e) {
+        console.error(e);
+    } finally {}
 }
 
 export default function (store) {
-    let emitter;
+    let em = emitter();
     const IO = {
-        subscribe(callback) {
-            emitter = callback;
-            return () => {
-                // Disposer do nothing
-            }
-        },
+        subscribe: em.subscribe,
         dispatch(output) {
-            emitter(output);
+            em.emit(output);
+            return output;
         },
         getState() {
             return null;
         }
     };
-    runSaga(IO, saga);
-
     window.dispatch = IO.dispatch;
+    runSaga(IO, saga);
 
     return {
         dispatch: IO.dispatch,

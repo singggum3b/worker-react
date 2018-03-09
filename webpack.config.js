@@ -14,6 +14,7 @@ module.exports = {
             {
                 test: /\.js?$/,
                 loader: "babel-loader",
+                exclude: /(mobx-react-devtools)/,
             },
             {
                 test: /\.styl?$/,
