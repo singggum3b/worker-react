@@ -1,18 +1,22 @@
 import React from "react";
 import { observer } from 'mobx-react';
 
-import type TodoStore from "../../store-domain/todo.class";
-
 export type Props = {
-    uncompletedTodoCount: number,
+    state: {
+        uncompletedTodoCount: number,
+        hide: boolean,
+    },
     clearCompletedTodo: Function,
 }
 
-const TodoFooter = observer(({ uncompletedTodoCount, clearCompletedTodo } : Props) => {
+const TodoFooter = observer((props : Props) => {
+    if (props.state.hide) {
+        return null;
+    }
     return (
         <footer className="footer">
             {/*<!-- This should be `0 items left` by default -->*/}
-            <span className="todo-count"><strong>{uncompletedTodoCount}</strong> item left</span>
+            <span className="todo-count"><strong>{props.state.uncompletedTodoCount}</strong> item left</span>
             {/*<!-- Remove this if you don't implement routing -->*/}
             <ul className="filters">
                 <li>
@@ -26,7 +30,7 @@ const TodoFooter = observer(({ uncompletedTodoCount, clearCompletedTodo } : Prop
                 </li>
             </ul>
             {/*<!-- Hidden if no completed items are left ↓ -->*/}
-            <button className="clear-completed" onClick={clearCompletedTodo}>Clear completed</button>
+            <button className="clear-completed" onClick={props.clearCompletedTodo}>Clear completed</button>
         </footer>
     )
 });

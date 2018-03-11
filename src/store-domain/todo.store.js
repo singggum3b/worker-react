@@ -14,15 +14,16 @@ export default class TodoStore {
         }, 0);
     }
 
-    @observable footerState = {
-        get uncompletedTodoCount() {
-            console.log(this.uncompletedTodoCount);
-            return this.uncompletedTodoCount;
-        }
+    @computed get isAllTodoCompleted() {
+        return !this.todoList.some((item: Todo) => !item.completed);
+    }
+
+    toggleAllTodo = (flag: boolean) => {
+        this.todoList.forEach((item: Todo) => item.completed = flag);
     };
 
     clearCompletedTodo = () => {
-        this.todoList = this.todoList.filter(i => !i.completed);
+        this.todoList.replace(this.todoList.filter(i => !i.completed));
     };
 
     constructor(indexStore, dispatch) {
@@ -37,6 +38,6 @@ export default class TodoStore {
     };
 
     removeTodo = (item: Todo) => {
-        this.todoList = this.todoList.filter(i => i.id !== item.id);
+        this.todoList.replace(this.todoList.filter(i => i !== item));
     }
 }
