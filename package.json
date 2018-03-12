@@ -28,8 +28,8 @@
     "todomvc-app-css": "^2.1.0",
     "todomvc-common": "^1.0.4",
     "toolbelt": "https://github.com/singggum3b/toolbelt.git",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "2.9.4",
+    "webpack": "^4.0.0",
+    "webpack-dev-server": "^3.0.0",
     "whatwg-fetch": "^2.0.3",
     "worker-loader": "^1.1.0"
   },
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "flow-bin": "^0.66.0",
-    "mobx-react-devtools": "^4.2.15"
+    "mobx-react-devtools": "^4.2.15",
+    "webpack-cli": "^2.0.11"
   }
 }
