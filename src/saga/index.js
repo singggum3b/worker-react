@@ -1,12 +1,10 @@
 import { runSaga, eventChannel } from 'redux-saga'
 import { spawn } from 'redux-saga/effects';
 import { emitter } from "redux-saga/lib/internal/channel";
-import tripSaga from './trip-saga';
 import todoSaga from './todo-saga';
 
 function* saga() {
     try {
-        yield spawn(tripSaga);
         yield spawn(todoSaga);
     } catch (e) {
         console.error(e);

@@ -1,5 +1,4 @@
 import { observable, computed } from 'mobx';
-import Trip from '../store-domain/trip.class';
 import { AddTodoAction } from "../saga/todo-action";
 import Todo from "./todo.class";
 
