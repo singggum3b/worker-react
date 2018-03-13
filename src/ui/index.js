@@ -59,7 +59,7 @@ const App = observer(function App() {
                     ]
                     )}
                 </Observer>
-                <TodoList key="todolist" todoList={store.todoStore.todoList} />
+                <TodoList key="todolist" todoList={store.uiStore.todoListComponent.todoList} />
             </section>
             <TodoFooter
                 state={store.uiStore.footer}

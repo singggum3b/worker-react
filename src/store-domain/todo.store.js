@@ -17,6 +17,19 @@ export default class TodoStore {
         return !this.todoList.some((item: Todo) => !item.completed);
     }
 
+    @computed get completedTodoList() {
+        return this.todoList.filter((item: Todo) => {
+            return item.completed;
+        });
+    }
+
+    @computed get uncompletedTodoList() {
+        console.log("uncompleted");
+        return this.todoList.filter((item: Todo) => {
+            return !item.completed;
+        });
+    }
+
     toggleAllTodo = (flag: boolean) => {
         this.todoList.forEach((item: Todo) => item.completed = flag);
     };

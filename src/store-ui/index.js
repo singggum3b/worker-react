@@ -40,6 +40,18 @@ export class UIStore extends BaseStore {
         const { routerStore, todoStore } = indexStore;
         const uiStore = this;
 
+        this.todoListComponent = {
+            get todoList() {
+                if (routerStore.location.pathname === "/completed") {
+                    return todoStore.completedTodoList;
+                }
+                if (routerStore.location.pathname === "/active") {
+                    return todoStore.uncompletedTodoList;
+                }
+                return todoStore.todoList;
+            }
+        };
+
         this.footer = {
             location: routerStore.location,
             get hide() {
