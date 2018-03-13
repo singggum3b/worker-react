@@ -1,8 +1,10 @@
 import React from "react";
 import { observer } from 'mobx-react';
+import { NavLink } from "react-router-dom";
 
 export type Props = {
     state: {
+        location: Object,
         uncompletedTodoCount: number,
         hide: boolean,
     },
@@ -14,19 +16,19 @@ const TodoFooter = observer((props : Props) => {
         return null;
     }
     return (
-        <footer className="footer">
+        <footer className="footer" data-path={props.state.location.pathname}>
             {/*<!-- This should be `0 items left` by default -->*/}
             <span className="todo-count"><strong>{props.state.uncompletedTodoCount}</strong> item left</span>
             {/*<!-- Remove this if you don't implement routing -->*/}
             <ul className="filters">
                 <li>
-                    <a className="selected" href="#/">All</a>
+                    <NavLink activeClassName="selected" to="/" exact >All</NavLink>
                 </li>
                 <li>
-                    <a href="#/active">Active</a>
+                    <NavLink activeClassName="selected" to="/active" exact>Active</NavLink>
                 </li>
                 <li>
-                    <a href="#/completed">Completed</a>
+                    <NavLink activeClassName="selected" to="/completed" exact>Completed</NavLink>
                 </li>
             </ul>
             {/*<!-- Hidden if no completed items are left ↓ -->*/}

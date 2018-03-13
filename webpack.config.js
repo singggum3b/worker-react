@@ -42,6 +42,7 @@ module.exports = {
         host: "0.0.0.0",
         port: 9000,
         compress: true,
+        historyApiFallback: true,
         // Test api
         proxy: {
             "/BRDRestService": "http://developer.itsmarta.com",
