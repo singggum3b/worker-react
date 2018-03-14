@@ -1,0 +1,114 @@
+// Keep all style here for the sake of simplified example
+
+:global(html) {
+  background-color whitesmoke
+}
+
+.gifyList {
+  list-style none;
+  padding 0
+}
+
+.gifyItem {
+  display inline-block
+  width 25%
+
+  :global(.content) {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid gainsboro;
+    background-color: white;
+  }
+
+  :global(.preview) {
+    width 100%
+    top: 50%;
+    transform: translateY(-50%);
+    position absolute
+  }
+
+  :global(.square) {
+    position relative
+    width 100%
+    background-color: linen;
+    border: 1px solid darkgray;
+    overflow hidden
+
+    &:after {
+      content: "";
+      display: block;
+      padding-bottom: 100%;
+    }
+  }
+
+  :global(.title) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+}
+
+.user {
+  :global(.avatar) {
+    vertical-align bottom
+    margin-right 5px
+  }
+}
+
+:global(.loadMore) {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  padding 5px 10px;
+  font-size 20px
+}
+
+.fullView {
+  position fixed
+  top 0
+  left 0
+  bottom 0
+  right 0
+  background-color rgba(black, 0.7)
+
+  :global(.content) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 2px solid black;
+    max-width 100%
+
+    :global(img) {
+      width 100%
+    }
+  }
+
+  :global(.close) {
+    display block
+    margin-right 0
+    margin-left auto
+  }
+
+}
+
+// Just do a simple media query for demo
+// for production app use js device detection instead
+
+// tablet
+@media only screen  and (min-device-width: 768px)  and (max-device-width: 1024px)  and (-webkit-min-device-pixel-ratio: 1) {
+  .gifyItem {
+    width (100/3)%
+  }
+}
+
+// mobile
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2) {
+  .gifyItem {
+    width 50%
+  }
+}

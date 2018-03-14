@@ -1,5 +1,6 @@
 import { observable, action, extendObservable } from "mobx";
-import TodoStore from '../store-domain/todo.store'
+import GifyStore from '../store-domain/gify.store'
+import Gify from "../store-domain/gify.class";
 
 export class BaseStore {
     indexStore: IndexStore;
@@ -12,9 +13,7 @@ export class BaseStore {
 }
 
 export default class IndexStore {
-    todoStore: TodoStore;
     uiStore: UIStore;
-    routerStore: RouterStore;
     dispatch: Function;
     history: Object;
 
@@ -22,78 +21,29 @@ export default class IndexStore {
         const { dispatch } = createSaga(this);
         this.dispatch = dispatch;
         this.history = history;
-        this.routerStore = new RouterStore(this, dispatch);
-        this.todoStore = new TodoStore(this, dispatch);
         this.uiStore = new UIStore(this, dispatch);
+        this.gifyStore = new GifyStore(this, dispatch);
     }
 
 }
 
 export class UIStore extends BaseStore {
 
-    @observable footer = {};
-    @observable todoToggle = {};
+    @observable fullViewUI = new FullViewUI();
 
     constructor(indexStore: IndexStore, dispatch: Function) {
         super(indexStore, dispatch);
-
-        const { routerStore, todoStore } = indexStore;
-        const uiStore = this;
-
-        this.todoListComponent = {
-            get todoList() {
-                if (routerStore.location.pathname === "/completed") {
-                    return todoStore.completedTodoList;
-                }
-                if (routerStore.location.pathname === "/active") {
-                    return todoStore.uncompletedTodoList;
-                }
-                return todoStore.todoList;
-            }
-        };
-
-        this.footer = {
-            location: routerStore.location,
-            get hide() {
-                return !todoStore.todoList.length;
-            },
-            get uncompletedTodoCount() { return indexStore.todoStore.uncompletedTodoCount },
-        };
-
-        this.todoToggle = {
-            get hide() {
-                return uiStore.footer.hide;
-            },
-            get checked() {
-                return indexStore.todoStore.isAllTodoCompleted;
-            },
-            toggle(e) {
-                indexStore.todoStore.toggleAllTodo(e.target.checked);
-            },
-        }
-
     }
 
 }
 
-export class RouterStore extends BaseStore {
+class FullViewUI {
+    @observable gify: Gify = null;
 
-    history;
-    @observable location = {
-        pathname: "",
-        key: "",
-        hash: "",
-        state: "",
-        search: "",
-    };
-
-    constructor(indexStore: IndexStore, dispatch: Function) {
-        super(indexStore, dispatch);
-        this.history = indexStore.history;
+    @action.bound
+    close(e) {
+        if (e.target !== e.currentTarget) return;
+        this.gify = null;
     }
 
-    @action
-    updateLocation(location) {
-        Object.assign(this.location, location);
-    }
 }
