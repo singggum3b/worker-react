@@ -5,9 +5,11 @@
 
 ### How to run
 - Excute 
-```$bash
+```
+
 yarn
 yarn dev
+
 ```
 - open localhost:9000
 
