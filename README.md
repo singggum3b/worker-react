@@ -1,4 +1,18 @@
-# Reactive React Todo Example (with Mobx)
-## Reading material
-- https://mobx.js.org/intro/concepts.html
-- https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
+# Pyco Gifylist demo
+### Environment
+- NodeJS 8.10 & yarn or npm
+- Chrome Browser
+
+### How to run
+- Excute 
+```$bash
+yarn
+yarn dev
+```
+- open localhost:9000
+
+### More opensource goodies
+See my opensource repos:
+  
+  - https://github.com/singggum3b
+  - https://bitbucket.org/singgum3b/

@@ -8,14 +8,14 @@ import styles from "./gify-list.styl";
 const GifyItem = observer((props : { gify: Gify }) => {
     return (
         <li className={styles.gifyItem}>
-            <div className="content" onClick={props.gify.showFullScreen}>
-                <div className="square">
+            <div className="content">
+                <div className="square" onClick={props.gify.showFullScreen} >
                     <img className="preview" src={props.gify.preview} alt={props.gify.title} />
                 </div>
                 <h4 className="title" title={props.gify.title}>{props.gify.title}</h4>
                 <div className={styles.user}>
                     <img className="avatar" src={props.gify.user.avatar_url} alt={props.gify.user.username} width="20" />
-                    <a href={props.gify.user.profile_url}>{props.gify.user.username}</a>
+                    <a target="_blank" href={props.gify.user.profile_url}>{props.gify.user.username}</a>
                 </div>
             </div>
         </li>

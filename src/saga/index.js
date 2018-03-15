@@ -2,11 +2,7 @@ import { runSaga, eventChannel } from 'redux-saga'
 import { emitter } from "redux-saga/lib/internal/channel";
 
 function* saga() {
-    try {
-        // No need saga for this simple example
-    } catch (e) {
-        console.error(e);
-    } finally {}
+    yield null;
 }
 
 export default function (store) {
