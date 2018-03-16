@@ -5,6 +5,7 @@
   "author": "TruongNX",
   "license": "MIT",
   "dependencies": {
+    "@types/react": "^16.0.40",
     "babel-cli": "^6.24.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",

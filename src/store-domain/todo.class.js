@@ -16,7 +16,7 @@ export default class Todo {
         this.value = value;
     }
 
-    toggleCompleted = (e) => {
+    toggleCompleted = (e: ReactDOM.Event) => {
         this.completed = !!e.target.checked;
     };
 
