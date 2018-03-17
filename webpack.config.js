@@ -2,7 +2,7 @@ const webpack = require("webpack");
 const path = require("path");
 
 module.exports = {
-    entry: ["whatwg-fetch", "./src/index.js"],
+    entry: ["./src/index.ts"],
     output: {
         path: path.resolve(__dirname, "./dist"),
         filename: "bundle.js"
@@ -10,8 +10,17 @@ module.exports = {
     mode: "development",
     devtool: "source-map",
     target: "web",
+    resolve: {
+        // Add `.ts` and `.tsx` as a resolvable extension.
+        extensions: [".ts", ".tsx", ".js"]
+    },
     module: {
         rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
             {
                 test: /\.js?$/,
                 loader: "babel-loader",

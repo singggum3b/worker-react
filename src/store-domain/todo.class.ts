@@ -1,11 +1,11 @@
 import { observable } from 'mobx';
-import TodoStore from './todo.store';
+import { TodoStore } from './todo.store';
 import { RemoveTodoAction } from '../saga/todo-action';
-import {InputHTMLAttributes, SyntheticEvent} from 'react';
+import { SyntheticEvent } from 'react';
 
 export class Todo {
     public id: number;
-    private store: TodoStore;
+    public store: TodoStore;
     @observable public value: string = '';
     @observable public completed: boolean = false;
     @observable public editing: boolean = false;

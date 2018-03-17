@@ -1,21 +1,22 @@
 import { runSaga, eventChannel } from 'redux-saga'
 import { spawn } from 'redux-saga/effects';
-import { emitter } from "redux-saga/lib/internal/channel";
-import todoSaga from './todo-saga';
+import { emitter } from 'redux-saga/lib/internal/channel';
+import { todoSaga } from './todo-saga';
+import {IndexStore} from '../store-ui';
 
 function* saga() {
     try {
         yield spawn(todoSaga);
     } catch (e) {
         console.error(e);
-    } finally {}
+    }
 }
 
-export default function (store) {
-    let em = emitter();
+export function createSaga(store: IndexStore) {
+    const em = emitter();
     const IO = {
         subscribe: em.subscribe,
-        dispatch(output) {
+        dispatch(output: Object) {
             em.emit(output);
             return output;
         },
@@ -23,10 +24,10 @@ export default function (store) {
             return null;
         }
     };
-    window.dispatch = IO.dispatch;
+
     runSaga(IO, saga);
 
     return {
         dispatch: IO.dispatch,
-    }
+    };
 }

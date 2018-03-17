@@ -19,6 +19,7 @@ const TodoItem = observer(({ todo } : { todo: Todo }) => {
 TodoItem.displayName = "TodoItem";
 
 const TodoList = observer(({ todoList, className, defaultClassName }) => {
+    if (!todoList) return null;
     return (
         <ul className={defaultClassName + " " + (className || "")}>
             {

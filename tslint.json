@@ -301,7 +301,7 @@
     "no-parameter-reassignment": false,
     "no-redundant-jsdoc": true,
     "no-return-await": true,
-    "no-submodule-imports": true,
+    "no-submodule-imports": false,
     "no-this-assignment": true,
     "no-unnecessary-class": true,
     "no-unnecessary-type-assertion": false,
