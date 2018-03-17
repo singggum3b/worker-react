@@ -11,6 +11,12 @@ export class Todo {
     @observable public editing: boolean = false;
     @observable public focused: boolean = false;
 
+    public static fromJSON(store: TodoStore, json: { id: number , value: string}) {
+        const newTodo = new Todo(json.id, store, json.value);
+        Object.assign(newTodo, json);
+        return newTodo;
+    }
+
     constructor(id: number, store: TodoStore, value: string) {
         this.id = id;
         this.store = store;
@@ -23,5 +29,10 @@ export class Todo {
 
     public remove = () => {
         this.store.dispatch(new RemoveTodoAction(this));
+    };
+
+    public toJSON() {
+        const { id, value, completed, editing, focused } = this;
+        return { id, value, completed, editing, focused };
     }
 }

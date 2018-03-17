@@ -11,7 +11,7 @@ export class UIFooter {
     }
 
     @computed get location() {
-        return this.indexStore.routerStore.location;
+        return this.indexStore.routerStore.location || {};
     }
 
     @computed get hide() {

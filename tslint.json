@@ -302,7 +302,7 @@
     "no-redundant-jsdoc": true,
     "no-return-await": true,
     "no-submodule-imports": false,
-    "no-this-assignment": true,
+    "no-this-assignment": [true, {"allow-destructuring": true}],
     "no-unnecessary-class": true,
     "no-unnecessary-type-assertion": false,
     "number-literal-format": true,
