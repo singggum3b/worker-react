@@ -12,14 +12,10 @@ import { createSaga } from '../saga';
 import TodoList from './components/todo-list';
 import TodoInput from './components/todo-input';
 import TodoFooter from './components/todo-footer';
+import { MobxRouterIntegration } from './mobx-router';
 
 const history = createBrowserHistory();
 export const store = new IndexStore(createSaga, history);
-
-function MobxRouterIntegration(props : { location: Location, store: RouterStore }) {
-    props.store.updateLocation(props.location);
-    return null;
-}
 
 export function UI() {
     ReactDOM.render((
@@ -27,7 +23,7 @@ export function UI() {
             <Route path='*' render={(props) => {
                 return [
                     <APP key='app' />,
-                    <MobxRouterIntegration key='mri' {...props} store={store.routerStore} />
+                    <MobxRouterIntegration key='mri' {...props} store={store} />
                 ];
             }}/>
         </Router>
