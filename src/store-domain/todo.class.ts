@@ -33,7 +33,7 @@ export class Todo {
     };
 
     public toJSON() {
-        const { id, value, completed, editing, focused } = this;
-        return { id, value, completed, editing, focused };
+        const { id, value, completed } = this;
+        return { id, value, completed };
     }
 }

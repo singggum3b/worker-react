@@ -5,7 +5,7 @@ import { IndexStore } from "../store-ui";
 
 export class TodoStore {
 
-    private static readonly STORAGE_KEY: string = "todoList";
+    public static readonly STORAGE_KEY: string = "todoList";
 
     private static saveToStorage(json: object) {
         localStorage.setItem(TodoStore.STORAGE_KEY, JSON.stringify(json));
@@ -66,11 +66,14 @@ export class TodoStore {
     };
 
     @action
-    public addTodo = (value: string) => {
+    public addTodo = (value: string | Todo) => {
+        if (value instanceof Todo) {
+            return this.todoList.push(value);
+        }
         if (value === "") {
             return;
         }
-        this.todoList.push(new Todo(Date.now(), this.indexStore.todoStore, value));
+        return this.todoList.push(new Todo(Date.now(), this.indexStore.todoStore, value));
         // this.dispatch(new AddTodoAction(value, this));
     };
 
@@ -96,4 +99,5 @@ export class TodoStore {
             console.warn("Load local todos failed");
         }
     }
+
 }
