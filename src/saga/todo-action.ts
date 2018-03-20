@@ -1,8 +1,8 @@
-import {TodoStore} from '../store-domain/todo.store';
-import {Todo} from '../store-domain/todo.class';
+import {TodoStore} from "../store-domain/todo.store";
+import {Todo} from "../store-domain/todo.class";
 
 export class AddTodoAction {
-    public static readonly type: string = 'ADD_TODO';
+    public static readonly type: string = "ADD_TODO";
     public context: TodoStore;
     public value: string;
     public type: string = AddTodoAction.type;
@@ -14,7 +14,7 @@ export class AddTodoAction {
 }
 
 export class RemoveTodoAction {
-    public static readonly type: string = 'REMOVE_TODO';
+    public static readonly type: string = "REMOVE_TODO";
     public context: TodoStore;
     public todo: Todo;
     public type: string = RemoveTodoAction.type;

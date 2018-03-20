@@ -1,14 +1,14 @@
-import * as React from 'react';
-import {IndexStore} from '../store-ui';
+import * as React from "react";
+import {IndexStore} from "../store-ui";
 
-export interface MobxRouterIntegrationProps {
+export interface IMobxRouterIntegrationProps {
     location: Location;
     store: IndexStore;
 }
 
-export class MobxRouterIntegration extends React.PureComponent<MobxRouterIntegrationProps> {
+export class MobxRouterIntegration extends React.PureComponent<IMobxRouterIntegrationProps> {
 
-    public static updateLocation(props: MobxRouterIntegrationProps) {
+    public static updateLocation(props: IMobxRouterIntegrationProps) {
         props.store.routerStore.updateLocation(props.location);
     }
 
@@ -16,7 +16,7 @@ export class MobxRouterIntegration extends React.PureComponent<MobxRouterIntegra
         MobxRouterIntegration.updateLocation(this.props);
     }
 
-    public componentWillUpdate(props: MobxRouterIntegrationProps) {
+    public componentWillUpdate(props: IMobxRouterIntegrationProps) {
         MobxRouterIntegration.updateLocation(props);
     }
 

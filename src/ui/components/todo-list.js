@@ -1,11 +1,11 @@
 import React from "react";
-import { observer } from 'mobx-react';
+import { observer } from "mobx-react";
 
 import type Todo from "../../store-domain/todo.class";
 
 const TodoItem = observer(({ todo } : { todo: Todo }) => {
     return (
-        <li className={todo.completed ? "completed" : ''}>
+        <li className={todo.completed ? "completed" : ""}>
             <div className="view">
                 <input className="toggle" type="checkbox" checked={todo.completed} onChange={todo.toggleCompleted} />
                 <label>{todo.value}</label>

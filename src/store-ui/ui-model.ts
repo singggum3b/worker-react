@@ -1,7 +1,7 @@
-import {IndexStore} from './index';
-import {TodoStore} from '../store-domain/todo.store';
-import {action, computed} from 'mobx';
-import {SyntheticEvent} from 'react';
+import {IndexStore} from "./index";
+import {TodoStore} from "../store-domain/todo.store";
+import {action, computed} from "mobx";
+import {SyntheticEvent} from "react";
 
 export class UIFooter {
     public indexStore: IndexStore = null;
@@ -33,10 +33,10 @@ export class UITodoList {
     @computed get todoList() {
         const { routerStore, todoStore } = this.indexStore;
         if (!routerStore.location) { return null; }
-        if (routerStore.location.pathname === '/completed') {
+        if (routerStore.location.pathname === "/completed") {
             return todoStore.completedTodoList;
         }
-        if (routerStore.location.pathname === '/active') {
+        if (routerStore.location.pathname === "/active") {
             return todoStore.uncompletedTodoList;
         }
         return todoStore.todoList;

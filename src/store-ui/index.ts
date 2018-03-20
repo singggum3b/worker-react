@@ -1,12 +1,12 @@
-import { observable, action, extendObservable, IObservableObject, IObservableValue } from 'mobx';
-import { TodoStore } from '../store-domain/todo.store';
-import {UIFooter, UITodoList, UITodoToggle} from './ui-model';
+import { observable, action, extendObservable, IObservableObject, IObservableValue } from "mobx";
+import { TodoStore } from "../store-domain/todo.store";
+import {UIFooter, UITodoList, UITodoToggle} from "./ui-model";
 
 export class BaseStore {
     public indexStore: IndexStore;
-    public dispatch: Function;
+    public dispatch: IDispatch;
 
-    constructor(indexStore: IndexStore, dispatch: Function) {
+    constructor(indexStore: IndexStore, dispatch: IDispatch) {
         this.indexStore = indexStore;
         this.dispatch = dispatch;
     }
@@ -16,10 +16,10 @@ export class IndexStore {
     public todoStore: TodoStore;
     public uiStore: UIStore;
     public routerStore: RouterStore;
-    public dispatch: Function;
+    public dispatch: IDispatch;
     public history: History;
 
-    constructor(createSaga: Function, history: History) {
+    constructor(createSaga: (i: IndexStore) => { dispatch: IDispatch }, history: History) {
         const { dispatch } = createSaga(this);
         this.dispatch = dispatch;
         this.history = history;
@@ -36,7 +36,7 @@ export class UIStore extends BaseStore {
     @observable public todoToggle: UITodoToggle = new UITodoToggle(this.indexStore);
     @observable public todoListComponent: UITodoList = new UITodoList(this.indexStore);
 
-    constructor(indexStore: IndexStore, dispatch: Function) {
+    constructor(indexStore: IndexStore, dispatch: IDispatch) {
         super(indexStore, dispatch);
     }
 
@@ -47,7 +47,7 @@ export class RouterStore extends BaseStore {
     public history: History;
     @observable public location: Location = null;
 
-    constructor(indexStore: IndexStore, dispatch: Function) {
+    constructor(indexStore: IndexStore, dispatch: IDispatch) {
         super(indexStore, dispatch);
         this.history = indexStore.history;
     }

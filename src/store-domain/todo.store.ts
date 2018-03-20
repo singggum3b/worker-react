@@ -1,21 +1,22 @@
-import { observable, computed, IObservableArray, action, reaction, toJS } from 'mobx';
-import { AddTodoAction } from '../saga/todo-action';
-import { Todo } from './todo.class';
-import { IndexStore } from '../store-ui';
+import { observable, computed, IObservableArray, action, reaction, toJS } from "mobx";
+import { AddTodoAction } from "../saga/todo-action";
+import { Todo } from "./todo.class";
+import { IndexStore } from "../store-ui";
 
 export class TodoStore {
-    public indexStore: IndexStore;
-    public dispatch: Function;
 
-    private static readonly STORAGE_KEY: string = 'todoList';
+    private static readonly STORAGE_KEY: string = "todoList";
 
     private static saveToStorage(json: object) {
         localStorage.setItem(TodoStore.STORAGE_KEY, JSON.stringify(json));
     }
 
+    public indexStore: IndexStore;
+    public dispatch: IDispatch;
+
     @observable public todoList: IObservableArray<Todo> = observable.array([]);
 
-    constructor(indexStore: IndexStore, dispatch: Function) {
+    constructor(indexStore: IndexStore, dispatch: IDispatch) {
 
         this.indexStore = indexStore;
         this.dispatch = dispatch;
@@ -27,7 +28,7 @@ export class TodoStore {
         }, (json) => {
             TodoStore.saveToStorage(json);
         }, {
-            name: 'saveTodoStorage',
+            name: "saveTodoStorage",
         });
 
     }
@@ -66,7 +67,7 @@ export class TodoStore {
 
     @action
     public addTodo = (value: string) => {
-        if (value === '') {
+        if (value === "") {
             return;
         }
         this.todoList.push(new Todo(Date.now(), this.indexStore.todoStore, value));
@@ -92,7 +93,7 @@ export class TodoStore {
             const localTodo = JSON.parse(localStorage.getItem(TodoStore.STORAGE_KEY));
             this.fromJSON(localTodo);
         } catch (e) {
-            console.warn('Load local todos failed');
+            console.warn("Load local todos failed");
         }
     }
 }

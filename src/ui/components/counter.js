@@ -1,7 +1,7 @@
 import React from "react";
-import { observer } from 'mobx-react';
+import { observer } from "mobx-react";
 
-import styles from './counter.styl';
+import styles from "./counter.styl";
 
 const Counter = observer(({ data = [], className, defaultClassName }) => {
     return (
