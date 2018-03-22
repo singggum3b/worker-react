@@ -5,7 +5,7 @@ import type Todo from "../../store-domain/todo.class";
 
 const TodoItem = observer(({ todo } : { todo: Todo }) => {
     return (
-        <li className={todo.completed ? "completed" : ""}>
+        <li className={todo.completed ? "item completed" : "item"}>
             <div className="view">
                 <input className="toggle" type="checkbox" checked={todo.completed} onChange={todo.toggleCompleted} />
                 <label>{todo.value}</label>

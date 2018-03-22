@@ -25,7 +25,7 @@ export default class TodoInput extends Component<Props> {
         return (
             <input
                 className={TodoInput.defaultProps.defaultClassName}
-                placeholder="What needs to be done?" autoFocus
+                placeholder="What needs to be done ?" autoFocus
                 onKeyUp={this.addTodo}
             />
         );
