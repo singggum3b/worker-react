@@ -1,5 +1,5 @@
 import { TodoStore } from "../src/store-domain/todo.store";
-import { Todo } from "../src/store-domain/todo.class";
+import { UITodo } from "../src/store-ui/ui-model";
 
 describe("Todo store", () => {
 
@@ -25,7 +25,7 @@ describe("Todo store", () => {
     });
 
     it("save todoList to storage on changes", () => {
-        const sampleTodo = new Todo(1, todoStore, 'test1');
+        const sampleTodo = new UITodo(1, todoStore, 'test1');
         todoStore.addTodo(sampleTodo);
         expect(localStorage.setItem).toBeCalledWith(TodoStore.STORAGE_KEY, JSON.stringify(
             [{id: 1, value: 'test1', completed: false}]
