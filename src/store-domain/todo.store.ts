@@ -2,6 +2,7 @@ import { observable, computed, IObservableArray, action, reaction, toJS } from "
 import { AddTodoAction } from "../saga/todo-action";
 import { Todo } from "./todo.class";
 import { IndexStore } from "../store-ui";
+import { UITodo } from "../store-ui/ui-model";
 
 export class TodoStore {
 
@@ -14,7 +15,7 @@ export class TodoStore {
     public indexStore: IndexStore;
     public dispatch: IDispatch;
 
-    @observable public todoList: IObservableArray<Todo> = observable.array([]);
+    @observable public todoList: IObservableArray<UITodo> = observable.array([]);
 
     constructor(indexStore: IndexStore, dispatch: IDispatch) {
 
@@ -66,14 +67,14 @@ export class TodoStore {
     };
 
     @action
-    public addTodo = (value: string | Todo) => {
-        if (value instanceof Todo) {
+    public addTodo = (value: string | UITodo) => {
+        if (value instanceof UITodo) {
             return this.todoList.push(value);
         }
         if (value === "") {
             return;
         }
-        return this.todoList.push(new Todo(Date.now(), this.indexStore.todoStore, value));
+        return this.todoList.push(new UITodo(Date.now(), this.indexStore.todoStore, value));
         // this.dispatch(new AddTodoAction(value, this));
     };
 
@@ -84,7 +85,7 @@ export class TodoStore {
 
     @action
     public fromJSON(json: any[]) {
-        this.todoList.replace(json.map(item => Todo.fromJSON(this, item)));
+        this.todoList.replace(json.map(item => UITodo.fromJSON(this, item)));
     }
 
     public toJSON() {

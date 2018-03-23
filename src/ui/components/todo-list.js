@@ -1,20 +1,54 @@
 import React from "react";
+import { reaction, observe } from "mobx";
 import { observer } from "mobx-react";
+import classnames from "classnames";
 
-import type Todo from "../../store-domain/todo.class";
+import type { UITodo } from "../../store-ui/ui-model";
 
-const TodoItem = observer(({ todo } : { todo: Todo }) => {
-    return (
-        <li className={todo.completed ? "item completed" : "item"}>
-            <div className="view">
-                <input className="toggle" type="checkbox" checked={todo.completed} onChange={todo.toggleCompleted} />
-                <label>{todo.value}</label>
-                <button className="destroy" onClick={todo.remove}></button>
-            </div>
-            <input className="edit" defaultValue={todo.value} />
-        </li>
-    )
-});
+type Props = {
+    todo: UITodo,
+}
+
+@observer
+class TodoItem extends React.Component<Props> {
+
+    componentDidUpdate() {
+        if (!this.prevEditing && this.props.todo.editing) {
+            this.editingInput.focus();
+        }
+        this.prevEditing = this.props.todo.editing;
+    }
+
+    render() {
+        const { todo } = this.props;
+        const cls = classnames("item", {
+            "completed": todo.completed,
+            "editing": todo.editing,
+        });
+
+        return (
+            <li className={cls} >
+                <div className="view">
+                    <input className="toggle"
+                           type="checkbox"
+                           checked={todo.completed}
+                           onChange={todo.toggleCompleted}
+                    />
+                    <label onDoubleClick={todo.toggleEditMode} >{todo.value}</label>
+                    <button className="destroy" onClick={todo.remove}></button>
+                </div>
+                <input
+                    key="edit-input"
+                    ref={(el) => this.editingInput = el}
+                    className="edit"
+                    defaultValue={todo.value}
+                    onBlur={todo.onEditingBlur}
+                    onKeyUp={todo.onEditingKeyPress}
+                />
+            </li>
+        );
+    }
+}
 
 TodoItem.displayName = "TodoItem";
 

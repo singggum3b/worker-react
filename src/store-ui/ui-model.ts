@@ -2,6 +2,7 @@ import {IndexStore} from "./index";
 import {TodoStore} from "../store-domain/todo.store";
 import {action, computed} from "mobx";
 import {SyntheticEvent} from "react";
+import {Todo} from "../store-domain/todo.class";
 
 export class UIFooter {
     public indexStore: IndexStore = null;
@@ -40,6 +41,34 @@ export class UITodoList {
             return todoStore.uncompletedTodoList;
         }
         return todoStore.todoList;
+    }
+
+}
+
+export class UITodo extends Todo {
+
+    public static fromJSON(store: TodoStore, json: { id: number , value: string}) {
+        const newTodo = new UITodo(json.id, store, json.value);
+        Object.assign(newTodo, json);
+        return newTodo;
+    }
+
+    @action.bound
+    public save(e) {
+        this.toggleEditMode();
+        this.value = e.target.value;
+    }
+
+    public onEditingBlur = (e) => {
+        console.log("blur");
+        this.save(e);
+    };
+
+    public onEditingKeyPress = (e) => {
+        console.log("blur");
+        if (e.keypress === "Enter") {
+            this.save(e);
+        }
     }
 }
 

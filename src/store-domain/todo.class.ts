@@ -1,15 +1,9 @@
-import { observable } from "mobx";
+import {action, observable} from 'mobx';
 import { TodoStore } from "./todo.store";
 import { RemoveTodoAction } from "../saga/todo-action";
 import { SyntheticEvent } from "react";
 
 export class Todo {
-
-    public static fromJSON(store: TodoStore, json: { id: number , value: string}) {
-        const newTodo = new Todo(json.id, store, json.value);
-        Object.assign(newTodo, json);
-        return newTodo;
-    }
 
     public id: number;
     public store: TodoStore;
@@ -24,9 +18,15 @@ export class Todo {
         this.value = value;
     }
 
+    @action.bound
     public toggleCompleted = (e: SyntheticEvent<HTMLInputElement>) => {
         this.completed = e.currentTarget.checked;
     };
+
+    @action.bound
+    public toggleEditMode() {
+        this.editing = !this.editing;
+    }
 
     public remove = () => {
         this.store.dispatch(new RemoveTodoAction(this));
