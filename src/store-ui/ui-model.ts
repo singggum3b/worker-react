@@ -55,18 +55,17 @@ export class UITodo extends Todo {
 
     @action.bound
     public save(e) {
+        if (!this.editing) { return }
         this.toggleEditMode();
         this.value = e.target.value;
     }
 
     public onEditingBlur = (e) => {
-        console.log("blur");
         this.save(e);
     };
 
     public onEditingKeyPress = (e) => {
-        console.log("blur");
-        if (e.keypress === "Enter") {
+        if (e.key === "Enter") {
             this.save(e);
         }
     }

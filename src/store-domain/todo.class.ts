@@ -16,6 +16,7 @@ export class Todo {
         this.id = id;
         this.store = store;
         this.value = value;
+        this.init();
     }
 
     @action.bound
@@ -35,5 +36,9 @@ export class Todo {
     public toJSON() {
         const { id, value, completed } = this;
         return { id, value, completed };
+    }
+
+    protected init() {
+        return null;
     }
 }

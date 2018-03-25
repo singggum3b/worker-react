@@ -1,5 +1,6 @@
 interface IAction {
-    type: string
+    type: any,
+    [x: string]: any
 }
 
 type IDispatch = (action: IAction) => void

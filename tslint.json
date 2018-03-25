@@ -7,6 +7,7 @@
     "max-classes-per-file": [false],
     "no-submodule-imports": [true, "redux-saga"],
     "arrow-parens": ["ban-single-arg-parens"],
-    "no-this-assignment": [true, { "allow-destructuring": true }]
+    "no-this-assignment": [true, { "allow-destructuring": true }],
+    "object-literal-sort-keys": false
   }
 }
