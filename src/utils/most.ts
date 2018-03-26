@@ -11,7 +11,7 @@ function observe(o, callback) {
     });
 }
 
-class BridgeObservableBox<T> implements Observable<T> {
+class ProxyObservable<T> implements Observable<T> {
 
     public name: string;
 
@@ -67,7 +67,7 @@ export interface ISelfEmitStream<T> extends Stream<T> {
 }
 
 export function create(name) {
-    const value = new BridgeObservableBox(name);
+    const value = new ProxyObservable(name);
     const stream = from(value) as ISelfEmitStream<any>;
     stream.emit = value.emit;
     return stream;
