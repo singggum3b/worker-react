@@ -61,6 +61,8 @@ describe("Basic todo flows", () => {
         await addTodo(page, 'todo1');
         await toggleFirstTodo(page);
         const todoApp = await page.$('.todoapp');
+        // Wait for css transition
+        await page.waitFor(1000);
         expect(await todoApp.screenshot()).toMatchImageSnapshot();
 
         const todoItem = await page.$('.todo-list .item:first-child');

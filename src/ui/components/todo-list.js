@@ -42,8 +42,8 @@ class TodoItem extends React.Component<Props> {
                     ref={(el) => this.editingInput = el}
                     className="edit"
                     defaultValue={todo.value}
-                    onBlur={todo.onEditingBlur}
-                    onKeyUp={todo.onEditingKeyPress}
+                    onBlur={todo.inputBlur}
+                    onKeyUp={todo.inputKeyPress}
                 />
             </li>
         );

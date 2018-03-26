@@ -1,5 +1,4 @@
-import { observable, computed, IObservableArray, action, reaction, toJS } from "mobx";
-import { AddTodoAction } from "../saga/todo-action";
+import { observable, computed, IObservableArray, action, reaction } from "mobx";
 import { Todo } from "./todo.class";
 import { IndexStore } from "../store-ui";
 import { UITodo } from "../store-ui/ui-model";

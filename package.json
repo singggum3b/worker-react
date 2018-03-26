@@ -21,6 +21,7 @@
     "mobx": "^3.6.1",
     "mobx-react": "^4.4.2",
     "mobx-utils": "^3.2.2",
+    "most": "^1.7.3",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",

@@ -1,8 +1,10 @@
 import {IndexStore} from "./index";
 import {TodoStore} from "../store-domain/todo.store";
 import {action, computed} from "mobx";
-import {SyntheticEvent} from "react";
+import {InputHTMLAttributes, SyntheticEvent} from 'react';
 import {Todo} from "../store-domain/todo.class";
+import {create, ISelfEmitStream} from '../utils/most';
+import {merge, Stream} from 'most';
 
 export class UIFooter {
     public indexStore: IndexStore = null;
@@ -53,22 +55,47 @@ export class UITodo extends Todo {
         return newTodo;
     }
 
+    public inputBlurStream: ISelfEmitStream<string>;
+    public inputKeyPressStream: ISelfEmitStream<any>;
+    public saveStream: Stream<string>;
+
     @action.bound
-    public save(e) {
-        if (!this.editing) { return }
-        this.toggleEditMode();
-        this.value = e.target.value;
-    }
-
-    public onEditingBlur = (e) => {
-        this.save(e);
-    };
-
-    public onEditingKeyPress = (e) => {
-        if (e.key === "Enter") {
-            this.save(e);
+    public save(v) {
+        // if (!this.editing) { return }
+        // this.toggleEditMode();
+        if (v !== this.value) {
+            this.value = v;
         }
     }
+
+    public inputBlur = (e) => {
+        this.inputBlurStream.emit(e.target.value);
+    };
+
+    public inputKeyPress = (e) => {
+        this.inputKeyPressStream.emit({
+            value: e.target.value,
+            key: e.key,
+        });
+    };
+
+    protected init() {
+        this.inputBlurStream = create();
+        this.inputKeyPressStream = create();
+        this.saveStream = merge(
+            this.inputBlurStream.filter(() => this.editing),
+            this.inputKeyPressStream.filter((e) => {
+                return this.editing && e.key === "Enter";
+            }).map(e => e.value),
+        );
+        this.saveStream.skipRepeats().observe((v) => {
+            this.save(v);
+        });
+        this.saveStream.observe((v) => {
+            this.toggleEditMode();
+        })
+    }
+
 }
 
 export class UITodoToggle {
