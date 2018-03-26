@@ -4,7 +4,6 @@ import {from, Observable, Stream, Subscriber} from "most";
 function observe(o, callback) {
     return Proxy.revocable(o, {
         set(target, property, value) {
-            console.log("seeettt");
             target[property] = value;
             return callback(property, value);
         },

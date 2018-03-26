@@ -1,29 +1,27 @@
-import React from "react";
-import { reaction, observe } from "mobx";
+import * as React from "react";
 import { observer } from "mobx-react";
-import classnames from "classnames";
+import * as classnames from "classnames";
 
-import type { UITodo } from "../../store-ui/ui-model";
+import { UITodo } from "../../store-ui/ui-model";
 
-type Props = {
+interface IProps {
     todo: UITodo,
 }
 
 @observer
-class TodoItem extends React.Component<Props> {
+class TodoItem extends React.Component<IProps> {
 
-    componentDidUpdate() {
-        if (!this.prevEditing && this.props.todo.editing) {
-            this.editingInput.focus();
-        }
-        this.prevEditing = this.props.todo.editing;
+    public displayName = "TodoItem";
+
+    public componentDidUpdate() {
+        this.props.todo.componentDidUpdate(this.props.todo.editing);
     }
 
-    render() {
+    public render() {
         const { todo } = this.props;
         const cls = classnames("item", {
-            "completed": todo.completed,
-            "editing": todo.editing,
+            completed: todo.completed,
+            editing: todo.editing,
         });
 
         return (
@@ -39,7 +37,7 @@ class TodoItem extends React.Component<Props> {
                 </div>
                 <input
                     key="edit-input"
-                    ref={(el) => this.editingInput = el}
+                    ref={(el) => (todo.inputDom = el)}
                     className="edit"
                     defaultValue={todo.value}
                     onBlur={todo.inputBlur}
@@ -50,14 +48,20 @@ class TodoItem extends React.Component<Props> {
     }
 }
 
-TodoItem.displayName = "TodoItem";
+interface ITodoListProps {
+    todoList: UITodo[],
+    className?: string,
+    defaultClassName?: string
+}
 
-const TodoList = observer(({ todoList, className, defaultClassName }) => {
-    if (!todoList) return null;
+const TodoList: React.StatelessComponent<ITodoListProps> = observer(({ todoList, className, defaultClassName }) => {
+    if (!todoList) {
+        return null;
+    }
     return (
         <ul className={defaultClassName + " " + (className || "")}>
             {
-                todoList.map((todo: Todo) => {
+                todoList.map((todo: UITodo) => {
                     return <TodoItem key={todo.id} todo={todo} />
                 })
             }

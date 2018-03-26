@@ -1,10 +1,10 @@
 import {IndexStore} from "./index";
 import {TodoStore} from "../store-domain/todo.store";
 import {action, computed} from "mobx";
-import {InputHTMLAttributes, SyntheticEvent} from 'react';
+import {InputHTMLAttributes, SyntheticEvent} from "react";
 import {Todo} from "../store-domain/todo.class";
-import {create, ISelfEmitStream} from '../utils/most';
-import {merge, Stream} from 'most';
+import {create, ISelfEmitStream} from "../utils/most";
+import {merge, Stream} from "most";
 
 export class UIFooter {
     public indexStore: IndexStore = null;
@@ -55,9 +55,11 @@ export class UITodo extends Todo {
         return newTodo;
     }
 
+    public componentDidUpdateStream: ISelfEmitStream<boolean>;
     public inputBlurStream: ISelfEmitStream<string>;
     public inputKeyPressStream: ISelfEmitStream<any>;
     public saveStream: Stream<string>;
+    public inputDom: HTMLInputElement;
 
     @action.bound
     public save(v) {
@@ -66,6 +68,10 @@ export class UITodo extends Todo {
         if (v !== this.value) {
             this.value = v;
         }
+    }
+
+    public componentDidUpdate(editing: boolean) {
+        this.componentDidUpdateStream.emit(editing);
     }
 
     public inputBlur = (e) => {
@@ -80,17 +86,45 @@ export class UITodo extends Todo {
     };
 
     protected init() {
+        this.componentDidUpdateStream = create("componentDidUpdateStream");
         this.inputBlurStream = create("inputBlurStream");
         this.inputKeyPressStream = create("inputKeyPressStream");
+
+        // Focus input on editing
+        this.componentDidUpdateStream.scan((prevEditing: boolean, isEditing: boolean) => {
+            return !prevEditing && isEditing;
+        }, false).filter(Boolean).observe(() => {
+            this.inputDom.focus();
+        });
+
+        // Restore value on Escape
+        this.inputKeyPressStream.filter((e) => {
+            return this.editing && e.key === "Escape";
+        }).observe((e) => {
+            // Uncontrolled input need this to reset value
+            if (this.inputDom) {
+                this.inputDom.value = this.value;
+            }
+            this.toggleEditMode();
+        });
+
+        // Save event
         this.saveStream = merge(
             this.inputBlurStream.filter(() => this.editing),
             this.inputKeyPressStream.filter((e) => {
                 return this.editing && e.key === "Enter";
             }).map(e => e.value),
         );
+
+        // Save - skipp equal
         this.saveStream.skipRepeats().observe((v) => {
             this.save(v);
         });
+
+        // Remove on clear vaue
+        this.saveStream.filter(v => !v || v === "").observe(() => this.store.removeTodo(this));
+
+        // Cancel edit mode
         this.saveStream.observe((v) => {
             this.toggleEditMode();
         })
