@@ -1,13 +1,45 @@
 import symbolObservable from "symbol-observable"
 import {from, Observable, Stream, Subscriber} from "most";
-import {IObservableValue, IValueDidChange, observable} from "mobx";
+
+function observe(o, callback) {
+    return Proxy.revocable(o, {
+        set(target, property, value) {
+            console.log("seeettt");
+            target[property] = value;
+            return callback(property, value);
+        },
+    });
+}
 
 class BridgeObservableBox<T> implements Observable<T> {
 
-    private boxed: IObservableValue<any>;
+    public name: string;
 
-    constructor(value: any, name: string) {
-        this.boxed = observable.shallowBox(value, name);
+    private boxed;
+    private revoke;
+
+    private subscriberList: Array<Subscriber<T>> = [];
+
+    constructor(name: string) {
+
+        this.name = name;
+
+        const { proxy, revoke } = observe({
+            value: null,
+        }, (property, value) => {
+            this.subscriberList.forEach((subscriber) => {
+                try {
+                    subscriber.next(value);
+                } catch (e) {
+                    console.error(e);
+                    subscriber.error(e);
+                }
+            });
+            return true;
+        });
+
+        this.boxed = proxy;
+        this.revoke = revoke;
     }
 
     public [symbolObservable]() {
@@ -15,26 +47,18 @@ class BridgeObservableBox<T> implements Observable<T> {
     }
 
     public subscribe(subscriber: Subscriber<T>) {
-        const unsubscribe = this.boxed.observe((change: IValueDidChange<any>) => {
-            try {
-                subscriber.next(change.newValue.value);
-            } catch (e) {
-                console.error(e);
-                subscriber.error(e);
-            }
-        });
+        this.subscriberList.push(subscriber);
+
         return {
             unsubscribe: () => {
                 subscriber.complete();
-                unsubscribe();
+                this.subscriberList = this.subscriberList.filter(i => i === subscriber);
             },
         }
     }
 
     public emit = (e) => {
-        this.boxed.set({
-            value: e,
-        });
+        this.boxed.value = e;
     }
 }
 
@@ -43,7 +67,7 @@ export interface ISelfEmitStream<T> extends Stream<T> {
 }
 
 export function create(name) {
-    const value = new BridgeObservableBox(null, name);
+    const value = new BridgeObservableBox(name);
     const stream = from(value) as ISelfEmitStream<any>;
     stream.emit = value.emit;
     return stream;

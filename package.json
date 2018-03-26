@@ -22,6 +22,7 @@
     "mobx-react": "^4.4.2",
     "mobx-utils": "^3.2.2",
     "most": "^1.7.3",
+    "proxy-polyfill": "^0.2.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
