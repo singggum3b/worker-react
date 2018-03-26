@@ -80,8 +80,8 @@ export class UITodo extends Todo {
     };
 
     protected init() {
-        this.inputBlurStream = create();
-        this.inputKeyPressStream = create();
+        this.inputBlurStream = create("inputBlurStream");
+        this.inputKeyPressStream = create("inputKeyPressStream");
         this.saveStream = merge(
             this.inputBlurStream.filter(() => this.editing),
             this.inputKeyPressStream.filter((e) => {

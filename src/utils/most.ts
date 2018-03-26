@@ -6,8 +6,8 @@ class BridgeObservableBox<T> implements Observable<T> {
 
     private boxed: IObservableValue<any>;
 
-    constructor(value: any) {
-        this.boxed = observable.shallowBox(value);
+    constructor(value: any, name: string) {
+        this.boxed = observable.shallowBox(value, name);
     }
 
     public [symbolObservable]() {
@@ -42,8 +42,8 @@ export interface ISelfEmitStream<T> extends Stream<T> {
     emit: (e: T) => void
 }
 
-export function create() {
-    const value = new BridgeObservableBox(null);
+export function create(name) {
+    const value = new BridgeObservableBox(null, name);
     const stream = from(value) as ISelfEmitStream<any>;
     stream.emit = value.emit;
     return stream;
