@@ -1,12 +1,13 @@
 import { Todo } from "../src/store-domain/todo.class";
 import { RemoveTodoAction } from "../src/saga/todo-action";
+import {TodoStore} from "../src/store-domain/todo.store";
 
 describe("Todo object", () => {
 
     const dispatchFn = jest.fn();
     const todo = new Todo(1, {
         dispatch: dispatchFn,
-    }, 'test');
+    } as TodoStore, "test");
 
     it("have correct properties", () => {
         expect(todo.completed).toBe(false);
@@ -15,7 +16,7 @@ describe("Todo object", () => {
         expect(todo.toJSON()).toMatchObject({
             completed: false,
             id: 1,
-            value: 'test',
+            value: "test",
         });
     });
 
@@ -25,6 +26,5 @@ describe("Todo object", () => {
             new RemoveTodoAction(todo),
         )
     });
-
 
 });

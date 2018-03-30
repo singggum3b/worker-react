@@ -1,6 +1,7 @@
 import { observable, action, extendObservable, IObservableObject, IObservableValue } from "mobx";
 import { TodoStore } from "../store-domain/todo.store";
-import {UIFooter, UITodoList, UITodoToggle} from "./ui-model";
+import {UIFooter, UITodo, UITodoList, UITodoToggle} from "./ui-model";
+import {Todo} from "../store-domain/todo.class";
 
 export class BaseStore {
     public indexStore: IndexStore;

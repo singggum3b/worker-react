@@ -1,5 +1,6 @@
 import { TodoStore } from "../src/store-domain/todo.store";
-import { UITodo } from "../src/store-ui/ui-model";
+import {Todo} from "../src/store-domain/todo.class";
+import {IndexStore} from "../src/store-ui";
 
 describe("Todo store", () => {
 
@@ -14,7 +15,7 @@ describe("Todo store", () => {
     };
 
     const dispatch = jest.fn();
-    const todoStore = new TodoStore({}, dispatch);
+    const todoStore = new TodoStore({} as IndexStore, dispatch);
 
     it("has correct properties", () => {
 
@@ -25,14 +26,14 @@ describe("Todo store", () => {
     });
 
     it("save todoList to storage on changes", () => {
-        const sampleTodo = new UITodo(1, todoStore, 'test1');
+        const sampleTodo = new Todo(1, todoStore, "test1");
         todoStore.addTodo(sampleTodo);
         expect(localStorage.setItem).toBeCalledWith(TodoStore.STORAGE_KEY, JSON.stringify(
-            [{id: 1, value: 'test1', completed: false}]
+            [{id: 1, value: "test1", completed: false}],
         ));
         todoStore.removeTodo(sampleTodo);
         expect(localStorage.setItem).toBeCalledWith(TodoStore.STORAGE_KEY, JSON.stringify(
-            []
+            [],
         ));
     })
 

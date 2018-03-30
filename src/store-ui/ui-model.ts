@@ -33,101 +33,48 @@ export class UITodoList {
         this.indexStore = indexStore;
     }
 
-    @computed get todoList() {
+    @computed get todoList(): UITodo[] {
         const { routerStore, todoStore } = this.indexStore;
+        let result;
         if (!routerStore.location) { return null; }
         if (routerStore.location.pathname === "/completed") {
-            return todoStore.completedTodoList;
+            result = todoStore.completedTodoList;
+        } else if (routerStore.location.pathname === "/active") {
+            result = todoStore.uncompletedTodoList;
+        } else {
+            result = todoStore.todoList;
         }
-        if (routerStore.location.pathname === "/active") {
-            return todoStore.uncompletedTodoList;
-        }
-        return todoStore.todoList;
+
+        return result.map(todo => UITodo.fromTodo(todo))
     }
 
 }
 
-export class UITodo extends Todo {
+export class UITodo {
 
-    public static fromJSON(store: TodoStore, json: { id: number , value: string}) {
-        const newTodo = new UITodo(json.id, store, json.value);
-        Object.assign(newTodo, json);
-        return newTodo;
-    }
-
-    public componentDidUpdateStream: ISelfEmitStream<boolean>;
-    public inputBlurStream: ISelfEmitStream<string>;
-    public inputKeyPressStream: ISelfEmitStream<any>;
-    public saveStream: Stream<string>;
-    public inputDom: HTMLInputElement;
-
-    @action.bound
-    public save(v) {
-        // if (!this.editing) { return }
-        // this.toggleEditMode();
-        if (v !== this.value) {
-            this.value = v;
+    public static fromTodo(t: Todo) {
+        if (this.uiTodoList.has(t)) {
+            return this.uiTodoList.get(t);
         }
+        const newUITodo = new UITodo(t);
+        this.uiTodoList.set(t, newUITodo);
+        return newUITodo;
     }
 
-    public componentDidUpdate(editing: boolean) {
-        this.componentDidUpdateStream.emit(editing);
+    private static uiTodoList: WeakMap<Todo, UITodo> = new WeakMap<Todo, UITodo>();
+
+    private todo: Todo;
+
+    private constructor(t: Todo) {
+        this.todo = t;
     }
 
-    public inputBlur = (e) => {
-        this.inputBlurStream.emit(e.target.value);
-    };
+    @computed get id() {
+        return this.todo.id;
+    }
 
-    public inputKeyPress = (e) => {
-        this.inputKeyPressStream.emit({
-            value: e.target.value,
-            key: e.key,
-        });
-    };
-
-    protected init() {
-        this.componentDidUpdateStream = create("componentDidUpdateStream");
-        this.inputBlurStream = create("inputBlurStream");
-        this.inputKeyPressStream = create("inputKeyPressStream");
-
-        // Focus input on editing
-        this.componentDidUpdateStream.scan((prevEditing: boolean, isEditing: boolean) => {
-            return !prevEditing && isEditing;
-        }, false).filter(Boolean).observe(() => {
-            this.inputDom.focus();
-        });
-
-        // Restore value on Escape
-        this.inputKeyPressStream.filter((e) => {
-            return this.editing && e.key === "Escape";
-        }).observe((e) => {
-            // Uncontrolled input need this to reset value
-            if (this.inputDom) {
-                this.inputDom.value = this.value;
-            }
-            this.toggleEditMode();
-        });
-
-        // Save event
-        this.saveStream = merge(
-            this.inputBlurStream.filter(() => this.editing),
-            this.inputKeyPressStream.filter((e) => {
-                return this.editing && e.key === "Enter";
-            }).map(e => e.value),
-        );
-
-        // Save - skipp equal
-        this.saveStream.skipRepeats().observe((v) => {
-            this.save(v);
-        });
-
-        // Remove on clear vaue
-        this.saveStream.filter(v => !v || v === "").observe(() => this.store.removeTodo(this));
-
-        // Cancel edit mode
-        this.saveStream.observe((v) => {
-            this.toggleEditMode();
-        })
+    public getRoot() {
+        return this.todo;
     }
 
 }
@@ -139,12 +86,12 @@ export class UITodoToggle {
         this.indexStore = indexStore;
     }
 
-    get hide() {
+    @computed get hide() {
         const { uiStore } = this.indexStore;
         return uiStore.footer.hide;
     }
 
-    get checked() {
+    @computed get checked() {
         return this.indexStore.todoStore.isAllTodoCompleted;
     }
 

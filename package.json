@@ -63,7 +63,8 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "tsconfig.jest.json"
+        "tsConfigFile": "tsconfig.jest.json",
+        "enableTsDiagnostics": true
       }
     },
     "testRegex": "(/(__tests__|__e2e_test|__unit_test)/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
