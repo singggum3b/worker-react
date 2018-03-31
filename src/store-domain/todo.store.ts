@@ -93,10 +93,15 @@ export class TodoStore {
 
     public loadFromStorage() {
         try {
-            const localTodo = JSON.parse(localStorage.getItem(TodoStore.STORAGE_KEY));
+            const data = localStorage.getItem(TodoStore.STORAGE_KEY);
+            if (!data) {
+                console.info("No todo data to load");
+                return;
+            }
+            const localTodo = JSON.parse(data);
             this.fromJSON(localTodo);
         } catch (e) {
-            console.warn("Load local todos failed");
+            console.error("Load local todos failed", e);
         }
     }
 

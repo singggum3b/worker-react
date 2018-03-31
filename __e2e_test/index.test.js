@@ -1,4 +1,4 @@
-import * as pupet from 'puppeteer';
+import * as pupet from "puppeteer";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 
 let browser, page;
@@ -8,7 +8,7 @@ expect.extend({ toMatchImageSnapshot });
 beforeAll(async (done) => {
     browser = await pupet.launch();
     page = await browser.newPage();
-    await page.goto('http://localhost:9000');
+    await page.goto("http://localhost:9000");
     done();
 });
 
@@ -25,22 +25,22 @@ afterAll(async (done) => {
     done();
 });
 
-async function addTodo(page, text) {
-    const todoInput = await page.$('.new-todo');
+async function addTodo(p, text) {
+    const todoInput = await p.$(".new-todo");
     await todoInput.type(text);
-    await todoInput.press('Enter');
+    await todoInput.press("Enter");
 }
 
-async function toggleFirstTodo(page) {
-    const todoItem = await page.$('.todo-list .item:first-child');
-    const todoItemToggleButton = await todoItem.$('.toggle');
+async function toggleFirstTodo(p) {
+    const todoItem = await p.$(".todo-list .item:first-child");
+    const todoItemToggleButton = await todoItem.$(".toggle");
     await todoItemToggleButton.click();
 }
 
 describe("Basic todo flows", () => {
 
     it("first load correctly", async () => {
-        const todoInput = await page.$('.new-todo');
+        const todoInput = await page.$(".new-todo");
         const rawInput = await page.evaluate((el) => ({
             outerHTML: el.outerHTML,
         }), todoInput);
@@ -50,40 +50,40 @@ describe("Basic todo flows", () => {
     });
 
     it("add todo correctly", async () => {
-        await addTodo(page, 'todo1');
-        const todoApp = await page.$('.todoapp');
+        await addTodo(page, "todo1");
+        const todoApp = await page.$(".todoapp");
         const snapshot = await todoApp.screenshot();
         expect(snapshot).toMatchImageSnapshot();
     });
 
     it("remove todo correctly", async () => {
 
-        await addTodo(page, 'todo1');
+        await addTodo(page, "todo1");
         await toggleFirstTodo(page);
-        const todoApp = await page.$('.todoapp');
+        const todoApp = await page.$(".todoapp");
         // Wait for css transition
         await page.waitFor(1000);
         expect(await todoApp.screenshot()).toMatchImageSnapshot();
 
-        const todoItem = await page.$('.todo-list .item:first-child');
+        const todoItem = await page.$(".todo-list .item:first-child");
         await todoItem.hover();
-        const todoItem1RemoveButton = await todoItem.$('.destroy');
+        const todoItem1RemoveButton = await todoItem.$(".destroy");
         await todoItem1RemoveButton.click();
         expect(await todoApp.screenshot()).toMatchImageSnapshot();
     });
 
     it("reload todo correctly", async () => {
-        await addTodo(page, 'todo1');
+        await addTodo(page, "todo1");
         await page.reload();
-        const todoItems = await page.$$('.todo-list .item:first-child');
-        const todoApp = await page.$('.todoapp');
+        const todoItems = await page.$$(".todo-list .item:first-child");
+        const todoApp = await page.$(".todoapp");
         expect(todoItems.length).toEqual(1);
         expect(await todoApp.screenshot()).toMatchImageSnapshot();
     });
 
     it("filter todo correctly", async () => {
-        const todoApp = await page.$('.todoapp');
-        await addTodo(page, 'todo1');
+        const todoApp = await page.$(".todoapp");
+        await addTodo(page, "todo1");
         await toggleFirstTodo(page);
         const activeFilter = await page.$(".filters a[href='/active']");
         await activeFilter.click();

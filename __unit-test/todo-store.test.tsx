@@ -2,30 +2,29 @@ import { TodoStore } from "../src/store-domain/todo.store";
 import {Todo} from "../src/store-domain/todo.class";
 import {IndexStore} from "../src/store-ui";
 
-describe("Todo store", () => {
-
+beforeAll(() => {
     const storage = {};
     global.localStorage = {
         getItem: jest.fn().mockImplementation((key) => {
-            return storage[key];
+            return JSON.stringify(storage[key]);
         }),
         setItem: jest.fn().mockImplementation((key, value) => {
             storage[key] = value;
         }),
     };
+});
+
+describe("Todo store", () => {
 
     const dispatch = jest.fn();
-    const todoStore = new TodoStore({} as IndexStore, dispatch);
-
-    it("has correct properties", () => {
-
-    });
 
     it("load todoList from storage on create", () => {
+        const todoStore = new TodoStore({} as IndexStore, dispatch);
         expect(localStorage.getItem).toBeCalledWith(TodoStore.STORAGE_KEY);
     });
 
     it("save todoList to storage on changes", () => {
+        const todoStore = new TodoStore({} as IndexStore, dispatch);
         const sampleTodo = new Todo(1, todoStore, "test1");
         todoStore.addTodo(sampleTodo);
         expect(localStorage.setItem).toBeCalledWith(TodoStore.STORAGE_KEY, JSON.stringify(

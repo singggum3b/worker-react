@@ -44,7 +44,7 @@
   "scripts": {
     "dev": "webpack-dev-server",
     "prod": "webpack -p",
-    "test": "jest --verbose"
+    "test": "tsc --project tsconfig.test.json && jest --verbose"
   },
   "devDependencies": {
     "@types/jest": "^22.2.0",
@@ -52,20 +52,13 @@
     "jest-image-snapshot": "^2.4.0",
     "mobx-react-devtools": "^4.2.15",
     "puppeteer": "^1.2.0",
-    "ts-jest": "^22.4.2",
     "tslint": "^5.9.1",
     "tslint-react": "^3.5.1",
     "webpack-cli": "^2.0.11"
   },
   "jest": {
     "transform": {
-      "^.+\\.(t|j)sx?$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tsconfig.jest.json",
-        "enableTsDiagnostics": true
-      }
+      "^.+\\.tsx?$": "<rootDir>/ts-jest.js"
     },
     "testRegex": "(/(__tests__|__e2e_test|__unit_test)/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
