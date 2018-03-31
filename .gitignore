@@ -10,3 +10,5 @@ yarn-error.log
 dist
 
 __diff_output__
+
+coverage

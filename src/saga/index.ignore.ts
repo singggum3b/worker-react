@@ -1,7 +1,8 @@
+// Keep this file for reference only
+
 import { runSaga, eventChannel } from "redux-saga";
 import { spawn, takeEvery } from "redux-saga/effects";
 import { emitter } from "redux-saga/lib/internal/channel";
-import { todoSaga } from "./todo-saga";
 import {IndexStore} from "../store-ui";
 
 function* dynamicSaga(action: { type: string, saga: () => any, context: object }) {
@@ -15,7 +16,6 @@ function* dynamicSaga(action: { type: string, saga: () => any, context: object }
 function* saga() {
     try {
         yield takeEvery("RUN_SAGA", dynamicSaga);
-        yield spawn(todoSaga);
     } catch (e) {
         console.error(e);
     }

@@ -1,8 +1,6 @@
-import {action, observable} from 'mobx';
+import {action, observable} from "mobx";
 import { TodoStore } from "./todo.store";
-import { RemoveTodoAction } from "../saga/todo-action";
 import { SyntheticEvent } from "react";
-import {UITodo} from "../store-ui/ui-model";
 
 export class Todo {
 
@@ -46,7 +44,7 @@ export class Todo {
     }
 
     public remove = () => {
-        this.store.dispatch(new RemoveTodoAction(this));
+        this.store.removeTodo(this);
     };
 
     public toJSON() {

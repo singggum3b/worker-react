@@ -5,11 +5,9 @@ import {Todo} from "../store-domain/todo.class";
 
 export class BaseStore {
     public indexStore: IndexStore;
-    public dispatch: IDispatch;
 
-    constructor(indexStore: IndexStore, dispatch: IDispatch) {
+    constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
-        this.dispatch = dispatch;
     }
 }
 
@@ -17,16 +15,13 @@ export class IndexStore {
     public todoStore: TodoStore;
     public uiStore: UIStore;
     public routerStore: RouterStore;
-    public dispatch: IDispatch;
     public history: History;
 
-    constructor(createSaga: (i: IndexStore) => { dispatch: IDispatch }, history: History) {
-        const { dispatch } = createSaga(this);
-        this.dispatch = dispatch;
+    constructor(history: History) {
         this.history = history;
-        this.routerStore = new RouterStore(this, dispatch);
-        this.todoStore = new TodoStore(this, dispatch);
-        this.uiStore = new UIStore(this, dispatch);
+        this.routerStore = new RouterStore(this);
+        this.todoStore = new TodoStore(this);
+        this.uiStore = new UIStore(this);
     }
 
 }
@@ -37,8 +32,8 @@ export class UIStore extends BaseStore {
     @observable public todoToggle: UITodoToggle = new UITodoToggle(this.indexStore);
     @observable public todoListComponent: UITodoList = new UITodoList(this.indexStore);
 
-    constructor(indexStore: IndexStore, dispatch: IDispatch) {
-        super(indexStore, dispatch);
+    constructor(indexStore: IndexStore) {
+        super(indexStore);
     }
 
 }
@@ -48,8 +43,8 @@ export class RouterStore extends BaseStore {
     public history: History;
     @observable public location: Location = null;
 
-    constructor(indexStore: IndexStore, dispatch: IDispatch) {
-        super(indexStore, dispatch);
+    constructor(indexStore: IndexStore) {
+        super(indexStore);
         this.history = indexStore.history;
     }
 

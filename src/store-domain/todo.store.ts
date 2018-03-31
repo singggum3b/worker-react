@@ -12,14 +12,12 @@ export class TodoStore {
     }
 
     public indexStore: IndexStore;
-    public dispatch: IDispatch;
 
     @observable public todoList: IObservableArray<Todo> = observable.array([]);
 
-    constructor(indexStore: IndexStore, dispatch: IDispatch) {
+    constructor(indexStore: IndexStore) {
 
         this.indexStore = indexStore;
-        this.dispatch = dispatch;
 
         this.loadFromStorage();
 

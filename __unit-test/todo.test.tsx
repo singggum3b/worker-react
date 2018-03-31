@@ -1,5 +1,4 @@
 import { Todo } from "../src/store-domain/todo.class";
-import { RemoveTodoAction } from "../src/saga/todo-action";
 import {TodoStore} from "../src/store-domain/todo.store";
 
 describe("Todo object", () => {
@@ -16,13 +15,6 @@ describe("Todo object", () => {
             id: 1,
             value: "test",
         });
-    });
-
-    it("dispatch correct action when remove", () => {
-        todo.remove();
-        expect(dispatchFn).toBeCalledWith(
-            new RemoveTodoAction(todo),
-        )
     });
 
 });

@@ -16,15 +16,13 @@ beforeAll(() => {
 
 describe("Todo store", () => {
 
-    const dispatch = jest.fn();
-
     it("load todoList from storage on create", () => {
-        const todoStore = new TodoStore({} as IndexStore, dispatch);
+        const todoStore = new TodoStore({} as IndexStore);
         expect(localStorage.getItem).toBeCalledWith(TodoStore.STORAGE_KEY);
     });
 
     it("save todoList to storage on changes", () => {
-        const todoStore = new TodoStore({} as IndexStore, dispatch);
+        const todoStore = new TodoStore({} as IndexStore);
         const sampleTodo = new Todo(1, todoStore, "test1");
         todoStore.addTodo(sampleTodo);
         expect(localStorage.setItem).toBeCalledWith(TodoStore.STORAGE_KEY, JSON.stringify(

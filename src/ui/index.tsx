@@ -6,8 +6,7 @@ import { observer, Observer } from "mobx-react";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
-import { IndexStore, RouterStore } from "../store-ui";
-import { createSaga } from "../saga";
+import { IndexStore } from "../store-ui";
 
 import TodoList from "./components/todo-list";
 import TodoInput from "./components/todo-input";
@@ -15,17 +14,22 @@ import TodoFooter from "./components/todo-footer";
 import { MobxRouterIntegration } from "./mobx-router";
 
 const history = createBrowserHistory();
-export const store = new IndexStore(createSaga, history);
+export const store = new IndexStore(history);
+
+function wrapper(props) {
+    return [
+        <APP key="app" />,
+        <MobxRouterIntegration key="mri" {...props} store={store} />,
+    ];
+}
 
 export function UI() {
     ReactDOM.render((
         <Router history={history}>
-            <Route path="*" render={(props) => {
-                return [
-                    <APP key="app" />,
-                    <MobxRouterIntegration key="mri" {...props} store={store} />
-                ];
-            }}/>
+            <Route
+                path="*"
+                render={wrapper}
+            />
         </Router>
     ), document.getElementById("app"));
 }
