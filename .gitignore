@@ -12,3 +12,5 @@ dist
 __diff_output__
 
 coverage
+
+test-reporter
