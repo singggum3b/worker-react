@@ -49,7 +49,7 @@ module.exports = {
             'process.env.NODE_ENV': JSON.stringify(isProduction ? "production" : 'development')
         }),
         isProduction && new webpack.optimize.UglifyJsPlugin(),
-    ],
+    ].filter(Boolean),
     devServer: {
         host: "0.0.0.0",
         port: 9000,
