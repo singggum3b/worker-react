@@ -26,7 +26,7 @@ before_script:
  - yarn dev
 
 script:
- - yarn test
+ - sh ./script/test.sh
  - yarn prod
 
 after_script:

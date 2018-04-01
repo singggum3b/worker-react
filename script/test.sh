@@ -11,7 +11,8 @@ done
 
 pkill -f "(chrome)*?(--headless)"
 
-yarn test
+yarn test unit --coverage
+yarn test e2e
 
 echo "E2E test finished"
 
