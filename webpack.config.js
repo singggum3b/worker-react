@@ -47,8 +47,7 @@ module.exports = {
     plugins: [
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(isProduction ? "production" : 'development')
-        }),
-        isProduction && new webpack.optimize.UglifyJsPlugin(),
+        })
     ].filter(Boolean),
     devServer: {
         host: "0.0.0.0",
