@@ -1,5 +1,6 @@
 # Reactive React Todo Example (with Mobx)
 
+[![Build Status](https://travis-ci.org/singggum3b/worker-react.svg?branch=feat%2Fmobx-typescript)](https://travis-ci.org/singggum3b/worker-react)
 [![Maintainability](https://api.codeclimate.com/v1/badges/155f00bc8fa1a27c8ad7/maintainability)](https://codeclimate.com/github/singggum3b/worker-react/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/155f00bc8fa1a27c8ad7/test_coverage)](https://codeclimate.com/github/singggum3b/worker-react/test_coverage)
 

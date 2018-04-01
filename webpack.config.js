@@ -1,13 +1,15 @@
 const webpack = require("webpack");
 const path = require("path");
 
+const isProduction = (process.env.NODE_ENV === "production");
+
 module.exports = {
     entry: ["proxy-polyfill","./src/index.ts"],
     output: {
         path: path.resolve(__dirname, "./dist"),
         filename: "bundle.js"
     },
-    mode: "development",
+    mode: isProduction ? "production" : "development",
     devtool: "source-map",
     target: "web",
     resolve: {
@@ -44,17 +46,14 @@ module.exports = {
     },
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development')
+            'process.env.NODE_ENV': JSON.stringify(isProduction ? "production" : 'development')
         }),
+        isProduction && new webpack.optimize.UglifyJsPlugin(),
     ],
     devServer: {
         host: "0.0.0.0",
         port: 9000,
         compress: true,
-        historyApiFallback: true,
-        // Test api
-        proxy: {
-            "/BRDRestService": "http://developer.itsmarta.com",
-        }
+        historyApiFallback: true
     },
 };
