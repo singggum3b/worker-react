@@ -22,9 +22,6 @@ before_install:
 install:
  - yarn install --production=false
 
-before_script:
- - yarn dev
-
 script:
  - sh ./script/test.sh
  - yarn prod
