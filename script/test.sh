@@ -5,7 +5,7 @@ rm $LOG_FILE
 
 yarn dev | tee $LOG_FILE &
 
-until grep -R "Compiled successfully" $LOG_FILE; do
+until grep -R "Built at:" $LOG_FILE; do
  sleep 1
 done
 
