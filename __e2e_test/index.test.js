@@ -1,4 +1,4 @@
-import * as pupet from "puppeteer";
+import pupet from "puppeteer";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 
 let browser, page;

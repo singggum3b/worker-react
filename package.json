@@ -55,7 +55,8 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.tsx?$": "<rootDir>/ts-jest.js"
+      "^.+\\.tsx?$": "<rootDir>/ts-jest.js",
+      "^.+\\.jsx?$": "babel-jest"
     },
     "testRegex": "(/(__tests__|__e2e_test|__unit_test)/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
