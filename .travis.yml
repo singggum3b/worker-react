@@ -19,6 +19,9 @@ before_install:
  - chmod +x ./cc-test-reporter
  - ./cc-test-reporter before-build
 
+install:
+ - yarn install --production=false
+
 before_script:
  - yarn dev
 

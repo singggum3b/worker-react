@@ -36,7 +36,8 @@
     "typescript": "^2.7.2",
     "webpack": "^4.0.0",
     "webpack-dev-server": "^3.0.0",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "webpack-cli": "^2.0.11"
   },
   "scripts": {
     "dev": "webpack-dev-server",
@@ -47,11 +48,10 @@
     "@types/jest": "^22.2.0",
     "jest": "^22.4.2",
     "jest-image-snapshot": "^2.4.0",
-    "mobx-react-devtools": "^4.2.15",
+    "mobx-react-devtools": "^5.0.1",
     "puppeteer": "^1.2.0",
     "tslint": "^5.9.1",
-    "tslint-react": "^3.5.1",
-    "webpack-cli": "^2.0.11"
+    "tslint-react": "^3.5.1"
   },
   "jest": {
     "transform": {
