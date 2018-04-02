@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import DevTools from "mobx-react-devtools";
 import { observer, Observer } from "mobx-react";
 
 import { Router, Route } from "react-router-dom";
@@ -52,7 +51,7 @@ const APP = observer(function App() {
                                checked={store.uiStore.todoToggle.checked}
                                onChange={store.uiStore.todoToggle.toggle}
                         />,
-                        <label key="toggle-button-label" htmlFor="toggle-all">Mark all as complete</label>
+                        <label key="toggle-button-label" htmlFor="toggle-all">Mark all as complete</label>,
                     ]
                     )}
                 </Observer>
@@ -62,7 +61,6 @@ const APP = observer(function App() {
                 state={store.uiStore.footer}
                 clearCompletedTodo={store.todoStore.clearCompletedTodo}
             />
-            <DevTools/>
         </section>
     );
 });

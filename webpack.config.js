@@ -24,9 +24,8 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.js?$/,
+                test: /\.jsx?$/,
                 loader: "babel-loader",
-                exclude: /(mobx-react-devtools)/,
             },
             {
                 test: /\.styl?$/,
