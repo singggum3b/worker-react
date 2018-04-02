@@ -1,18 +1,16 @@
-import React from "react";
+import * as React from "react";
 import { observer } from "mobx-react";
 import { NavLink } from "react-router-dom";
+import {TodoStore} from "../../store-domain/todo.store";
+import {UIFooter} from "../../store-ui/ui-model";
 
-export type Props = {
-    state: {
-        location: Object,
-        uncompletedTodoCount: number,
-        hide: boolean,
-    },
-    clearCompletedTodo: Function,
+interface IProps {
+    state: UIFooter,
+    clearCompletedTodo: typeof TodoStore.prototype.clearCompletedTodo,
 }
 
-const TodoFooter = observer((props : Props) => {
-    if (props.state.hide) {
+const TodoFooter: React.StatelessComponent<IProps> = observer((props: IProps) => {
+    if (props.state.hide || !props.state.location) {
         return null;
     }
     return (

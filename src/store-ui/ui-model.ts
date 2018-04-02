@@ -1,10 +1,7 @@
 import {IndexStore} from "./index";
-import {TodoStore} from "../store-domain/todo.store";
 import {action, computed} from "mobx";
 import {InputHTMLAttributes, SyntheticEvent} from "react";
 import {Todo} from "../store-domain/todo.class";
-import {create, ISelfEmitStream} from "../utils/most";
-import {merge, Stream} from "most";
 
 export class UIFooter {
     public indexStore: IndexStore = null;
@@ -13,11 +10,11 @@ export class UIFooter {
         this.indexStore = indexStore;
     }
 
-    @computed get location() {
-        return this.indexStore.routerStore.location || {};
+    @computed get location(): Location {
+        return this.indexStore.routerStore.location || null;
     }
 
-    @computed get hide() {
+    @computed get hide(): boolean {
         const { todoStore } = this.indexStore;
         return !todoStore.todoList.length;
     }
