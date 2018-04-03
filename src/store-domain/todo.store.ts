@@ -1,13 +1,12 @@
 import { observable, computed, IObservableArray, action, reaction } from "mobx";
 import { Todo } from "./todo.class";
 import { IndexStore } from "../store-ui";
-import {UITodo} from "../store-ui/ui-model";
 
 export class TodoStore {
 
     public static readonly STORAGE_KEY: string = "todoList";
 
-    private static saveToStorage(json: object) {
+    private static saveToStorage(json: object): void {
         localStorage.setItem(TodoStore.STORAGE_KEY, JSON.stringify(json));
     }
 
@@ -21,7 +20,7 @@ export class TodoStore {
 
         this.loadFromStorage();
 
-        const disposer = reaction(() => {
+        reaction(() => {
             return this.toJSON();
         }, (json) => {
             TodoStore.saveToStorage(json);
@@ -31,65 +30,66 @@ export class TodoStore {
 
     }
 
-    @computed get uncompletedTodoCount() {
+    @computed get uncompletedTodoCount(): number {
         return this.todoList.reduce((result, todo: Todo) => {
             return todo.completed ? result : result + 1;
         }, 0);
     }
 
-    @computed get isAllTodoCompleted() {
+    @computed get isAllTodoCompleted(): boolean {
         return !this.todoList.some((item: Todo) => !item.completed);
     }
 
-    @computed get completedTodoList() {
+    @computed get completedTodoList(): Todo[] {
         return this.todoList.filter((item: Todo) => {
             return item.completed;
         });
     }
 
-    @computed get uncompletedTodoList() {
+    @computed get uncompletedTodoList(): Todo[] {
         return this.todoList.filter((item: Todo) => {
             return !item.completed;
         });
     }
 
     @action
-    public toggleAllTodo = (flag: boolean) => {
+    public toggleAllTodo = (flag: boolean): void => {
         this.todoList.forEach((item: Todo) => item.completed = flag);
     };
 
     @action
-    public clearCompletedTodo = () => {
+    public clearCompletedTodo = (): void => {
         this.todoList.replace(this.todoList.filter(i => !i.completed));
     };
 
     @action
-    public addTodo = (value: string | Todo) => {
+    public addTodo = (value: string | Todo): number => {
         if (value instanceof Todo) {
             return this.todoList.push(value);
         }
         if (value === "") {
-            return;
+            return -1;
         }
         return this.todoList.push(new Todo(Date.now(), this.indexStore.todoStore, value));
         // this.dispatch(new AddTodoAction(value, this));
     };
 
     @action
-    public removeTodo = (item: Todo) => {
+    public removeTodo = (item: Todo): void => {
         this.todoList.replace(this.todoList.filter(i => i !== item));
     };
 
     @action
-    public fromJSON(json: any[]) {
+    public fromJSON(json: any[]): typeof TodoStore.prototype.todoList {
         this.todoList.replace(json.map(item => Todo.fromJSON(this, item)));
+        return this.todoList;
     }
 
-    public toJSON() {
+    public toJSON(): Array<ReturnType<typeof Todo.prototype.toJSON>> {
         return this.todoList.map(todo => todo.toJSON());
     }
 
-    public loadFromStorage() {
+    public loadFromStorage(): void {
         try {
             const data = localStorage.getItem(TodoStore.STORAGE_KEY);
             if (!data) {

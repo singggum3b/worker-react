@@ -21,13 +21,13 @@ class TodoItem extends React.Component<IProps> {
     private inputBlurStream: ISelfEmitStream<string>;
     private inputKeyPressStream: ISelfEmitStream<any>;
     private saveStream: Stream<string>;
-    private inputDom: HTMLInputElement;
+    private inputDom: HTMLInputElement | null = null;
 
     @computed get todo(): Todo {
         return this.props.todo.getRoot();
     }
 
-    constructor(props) {
+    constructor(props: IProps) {
         super(props);
 
         this.componentDidUpdateStream = create("componentDidUpdateStream");
@@ -46,13 +46,13 @@ class TodoItem extends React.Component<IProps> {
         this.componentDidUpdateStream.scan((prevEditing: boolean, isEditing: boolean) => {
             return !prevEditing && isEditing;
         }, false).filter(Boolean).observe(() => {
-            this.inputDom.focus();
+            this.inputDom && this.inputDom.focus();
         });
 
         // Restore value on Escape
         this.inputKeyPressStream.filter((e) => {
             return this.todo.editing && e.key === "Escape";
-        }).observe((e) => {
+        }).observe((_) => {
             // Uncontrolled input need this to reset value
             if (this.inputDom) {
                 this.inputDom.value = this.todo.value;
@@ -70,28 +70,28 @@ class TodoItem extends React.Component<IProps> {
             .observe(() => this.todo.remove());
 
         // Cancel edit mode
-        this.saveStream.observe((v) => {
+        this.saveStream.observe((_) => {
             this.todo.toggleEditMode();
         });
 
     }
 
-    public componentDidUpdate() {
+    public componentDidUpdate(): void {
         this.componentDidUpdateStream.emit(this.todo.editing);
     }
 
-    public inputBlur = (e) => {
-        this.inputBlurStream.emit(e.target.value);
+    public inputBlur = (e: React.SyntheticEvent<HTMLInputElement>): void => {
+        this.inputBlurStream.emit(e.currentTarget.value);
     };
 
-    public inputKeyPress = (e) => {
+    public inputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
         this.inputKeyPressStream.emit({
-            value: e.target.value,
+            value: e.currentTarget.value,
             key: e.key,
         });
     };
 
-    public render() {
+    public render(): React.ReactNode {
         const todo = this.todo;
         const cls = classnames("item", {
             completed: todo.completed,
@@ -112,7 +112,7 @@ class TodoItem extends React.Component<IProps> {
                 </div>
                 <input
                     key="edit-input"
-                    ref={(el) => (this.inputDom = el)}
+                    ref={(el): void => {this.inputDom = el}}
                     className="edit"
                     defaultValue={todo.value}
                     onBlur={this.inputBlur}

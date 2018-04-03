@@ -1,10 +1,10 @@
 import symbolObservable from "symbol-observable"
-import {from, Observable, Stream, Subscriber} from "most";
+import {from, Observable, Stream, Subscriber, Subscription} from "most";
 
-function observe(o, callback) {
+function observe<T extends object>(o: T, callback: (s: any, v: any) => boolean): { proxy: T, revoke: () => void } {
     return Proxy.revocable(o, {
-        set(target, property, value) {
-            target[property] = value;
+        set(target: T, property: string, value: any): boolean {
+            (target as any)[property] = value;
             return callback(property, value);
         },
     });
@@ -14,8 +14,8 @@ class ProxyObservable<T> implements Observable<T> {
 
     public name: string;
 
-    private boxed;
-    private revoke;
+    private boxed: { value: T | null };
+    private revoke: () => void;
 
     private subscriberList: Array<Subscriber<T>> = [];
 
@@ -25,7 +25,7 @@ class ProxyObservable<T> implements Observable<T> {
 
         const { proxy, revoke } = observe({
             value: null,
-        }, (property, value) => {
+        }, (_, value) => {
             this.subscriberList.forEach((subscriber) => {
                 try {
                     subscriber.next(value);
@@ -41,22 +41,26 @@ class ProxyObservable<T> implements Observable<T> {
         this.revoke = revoke;
     }
 
-    public [symbolObservable]() {
+    public [symbolObservable](): ProxyObservable<T> {
         return this;
     }
 
-    public subscribe(subscriber: Subscriber<T>) {
+    public subscribe(subscriber: Subscriber<T>): Subscription<T>  {
         this.subscriberList.push(subscriber);
 
         return {
-            unsubscribe: () => {
+            unsubscribe: (): void => {
                 subscriber.complete();
                 this.subscriberList = this.subscriberList.filter(i => i === subscriber);
             },
         }
     }
 
-    public emit = (e) => {
+    public destroy(): void {
+        this.revoke();
+    }
+
+    public emit = (e: T): void => {
         this.boxed.value = e;
     }
 }
@@ -65,9 +69,9 @@ export interface ISelfEmitStream<T> extends Stream<T> {
     emit: (e: T) => void
 }
 
-export function create(name) {
-    const value = new ProxyObservable(name);
-    const stream = from(value) as ISelfEmitStream<any>;
+export function create<T extends (string | number | boolean | object)>(name: string): ISelfEmitStream<T> {
+    const value = new ProxyObservable<T>(name);
+    const stream = from<T>(value) as ISelfEmitStream<T>;
     stream.emit = value.emit;
     return stream;
 }

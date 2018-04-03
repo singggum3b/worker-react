@@ -8,19 +8,18 @@ export interface IMobxRouterIntegrationProps {
 
 export class MobxRouterIntegration extends React.PureComponent<IMobxRouterIntegrationProps> {
 
-    public static updateLocation(props: IMobxRouterIntegrationProps) {
+    public static updateLocation(props: IMobxRouterIntegrationProps): void {
         props.store.routerStore.updateLocation(props.location);
     }
 
-    public componentWillMount() {
-        MobxRouterIntegration.updateLocation(this.props);
+    public static getDerivedStateFromProps(nextProps: IMobxRouterIntegrationProps): null {
+        MobxRouterIntegration.updateLocation(nextProps);
+        return null;
     }
 
-    public componentWillUpdate(props: IMobxRouterIntegrationProps) {
-        MobxRouterIntegration.updateLocation(props);
-    }
+    public state = {};
 
-    public render() {
+    public render(): React.ReactNode {
         return null;
     }
 }

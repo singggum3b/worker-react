@@ -1,17 +1,17 @@
 import {IndexStore} from "./index";
 import {action, computed} from "mobx";
-import {InputHTMLAttributes, SyntheticEvent} from "react";
+import {SyntheticEvent} from "react";
 import {Todo} from "../store-domain/todo.class";
 
 export class UIFooter {
-    public indexStore: IndexStore = null;
+    public indexStore: IndexStore;
 
     constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
     }
 
-    @computed get location(): Location {
-        return this.indexStore.routerStore.location || null;
+    @computed get location(): Location | null {
+        return this.indexStore.routerStore.location;
     }
 
     @computed get hide(): boolean {
@@ -19,7 +19,7 @@ export class UIFooter {
         return !todoStore.todoList.length;
     }
 
-    @computed get uncompletedTodoCount() { return this.indexStore.todoStore.uncompletedTodoCount; }
+    @computed get uncompletedTodoCount(): number { return this.indexStore.todoStore.uncompletedTodoCount; }
 
 }
 
@@ -33,7 +33,7 @@ export class UITodoList {
     @computed get todoList(): UITodo[] {
         const { routerStore, todoStore } = this.indexStore;
         let result;
-        if (!routerStore.location) { return null; }
+        if (!routerStore.location) { return []; }
         if (routerStore.location.pathname === "/completed") {
             result = todoStore.completedTodoList;
         } else if (routerStore.location.pathname === "/active") {
@@ -49,9 +49,10 @@ export class UITodoList {
 
 export class UITodo {
 
-    public static fromTodo(t: Todo) {
-        if (this.uiTodoList.has(t)) {
-            return this.uiTodoList.get(t);
+    public static fromTodo(t: Todo): UITodo {
+        const cached = this.uiTodoList.get(t);
+        if (cached) {
+            return cached;
         }
         const newUITodo = new UITodo(t);
         this.uiTodoList.set(t, newUITodo);
@@ -66,11 +67,11 @@ export class UITodo {
         this.todo = t;
     }
 
-    @computed get id() {
+    @computed get id(): typeof Todo.prototype.id {
         return this.todo.id;
     }
 
-    public getRoot() {
+    public getRoot(): Todo {
         return this.todo;
     }
 
@@ -83,17 +84,17 @@ export class UITodoToggle {
         this.indexStore = indexStore;
     }
 
-    @computed get hide() {
+    @computed get hide(): boolean {
         const { uiStore } = this.indexStore;
         return uiStore.footer.hide;
     }
 
-    @computed get checked() {
+    @computed get checked(): boolean {
         return this.indexStore.todoStore.isAllTodoCompleted;
     }
 
     @action.bound
-    public toggle(e: SyntheticEvent<HTMLInputElement>) {
+    public toggle(e: SyntheticEvent<HTMLInputElement>): void {
         this.indexStore.todoStore.toggleAllTodo(e.currentTarget.checked);
     }
 }

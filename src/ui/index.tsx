@@ -15,14 +15,16 @@ import { MobxRouterIntegration } from "./mobx-router";
 const history = createBrowserHistory();
 export const store = new IndexStore(history);
 
-function wrapper(props) {
+function wrapper(props: any): React.ReactNode {
     return [
-        <APP key="app" />,
+        <React.StrictMode  key="app">
+            <APP />
+        </React.StrictMode>,
         <MobxRouterIntegration key="mri" {...props} store={store} />,
     ];
 }
 
-export function UI() {
+export function UI(): void {
     ReactDOM.render((
         <Router history={history}>
             <Route
@@ -33,7 +35,7 @@ export function UI() {
     ), document.getElementById("app"));
 }
 
-const APP = observer(function App() {
+const APP = observer(function App(): any {
     return (
         <section className="todoapp" >
             {/*<Counter key="counter" data={store.tripStore.tripList} />*/}
@@ -43,7 +45,7 @@ const APP = observer(function App() {
             </header>
             <section className="main">
                 <Observer>
-                    {() => (
+                    {(): any => (
                     !store.uiStore.todoToggle.hide && [
                         <input key="toggle-button" id="toggle-all"
                                className="toggle-all"
