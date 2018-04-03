@@ -3,8 +3,8 @@ import {Todo} from "../src/store-domain/todo.class";
 import {IndexStore} from "../src/store-ui";
 
 beforeAll(() => {
-    const storage = {};
-    global.localStorage = {
+    const storage: {[k: string]: any} = {};
+    (global as any).localStorage = {
         getItem: jest.fn().mockImplementation((key) => {
             return JSON.stringify(storage[key]);
         }),
@@ -17,7 +17,7 @@ beforeAll(() => {
 describe("Todo store", () => {
 
     it("load todoList from storage on create", () => {
-        const todoStore = new TodoStore({} as IndexStore);
+        const _todoStore = new TodoStore({} as IndexStore);
         expect(localStorage.getItem).toBeCalledWith(TodoStore.STORAGE_KEY);
     });
 

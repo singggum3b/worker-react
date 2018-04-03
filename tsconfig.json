@@ -5,7 +5,14 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "jsx": "react",
-    "diagnostics": true
+    "diagnostics": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "alwaysStrict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true
   },
   "exclude": [
     "node_modules",

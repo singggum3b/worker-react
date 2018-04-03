@@ -8,6 +8,8 @@
     "no-submodule-imports": [true, "redux-saga"],
     "arrow-parens": ["ban-single-arg-parens"],
     "no-this-assignment": [true, { "allow-destructuring": true }],
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "typedef": [true, "call-signature", "arrow-call-signature"],
+    "no-unused-expression": [true, "allow-fast-null-checks"]
   }
 }

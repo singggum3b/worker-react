@@ -13,7 +13,7 @@ export default class TodoInput extends React.Component<IProps> {
 
     public static displayName = "TodoInput";
 
-    public render() {
+    public render(): React.ReactNode {
         return (
             <input
                 className={TodoInput.defaultProps.defaultClassName}
@@ -23,9 +23,9 @@ export default class TodoInput extends React.Component<IProps> {
         );
     }
 
-    private addTodo = (e) => {
+    private addTodo = (e: React.KeyboardEvent<HTMLInputElement>): void => {
         if (e.key === "Enter") {
-            this.props.addTodo(e.target.value);
+            this.props.addTodo(e.currentTarget.value);
         }
     };
 }

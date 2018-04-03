@@ -4,7 +4,7 @@ import { SyntheticEvent } from "react";
 
 export class Todo {
 
-    public static fromJSON(store: TodoStore, json: { id: number , value: string}) {
+    public static fromJSON(store: TodoStore, json: { id: number , value: string}): Todo {
         const newTodo = new Todo(json.id, store, json.value);
         Object.assign(newTodo, json);
         return newTodo;
@@ -25,17 +25,17 @@ export class Todo {
     }
 
     @action.bound
-    public toggleCompleted = (e: SyntheticEvent<HTMLInputElement>) => {
+    public toggleCompleted = (e: SyntheticEvent<HTMLInputElement>): void => {
         this.completed = e.currentTarget.checked;
     };
 
     @action.bound
-    public toggleEditMode() {
+    public toggleEditMode(): void {
         this.editing = !this.editing;
     }
 
     @action.bound
-    public save(v) {
+    public save(v: string): void {
         // if (!this.editing) { return }
         // this.toggleEditMode();
         if (v !== this.value) {
@@ -43,16 +43,16 @@ export class Todo {
         }
     }
 
-    public remove = () => {
+    public remove = (): void => {
         this.store.removeTodo(this);
     };
 
-    public toJSON() {
+    public toJSON(): {[key: string]: any} {
         const { id, value, completed } = this;
         return { id, value, completed };
     }
 
-    protected init() {
-        return null;
+    protected init(): void {
+        return;
     }
 }

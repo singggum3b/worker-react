@@ -1,7 +1,7 @@
-import { observable, action, extendObservable, IObservableObject, IObservableValue } from "mobx";
+import { observable, action } from "mobx";
 import { TodoStore } from "../store-domain/todo.store";
-import {UIFooter, UITodo, UITodoList, UITodoToggle} from "./ui-model";
-import {Todo} from "../store-domain/todo.class";
+import {UIFooter, UITodoList, UITodoToggle} from "./ui-model";
+import { History } from "history";
 
 export class BaseStore {
     public indexStore: IndexStore;
@@ -41,7 +41,7 @@ export class UIStore extends BaseStore {
 export class RouterStore extends BaseStore {
 
     public history: History;
-    @observable public location: Location = null;
+    @observable public location: Location | null = null;
 
     constructor(indexStore: IndexStore) {
         super(indexStore);
@@ -49,7 +49,7 @@ export class RouterStore extends BaseStore {
     }
 
     @action
-    public updateLocation(location: Location) {
+    public updateLocation(location: Location): void {
         if (!this.location) {
             this.location = location;
         } else {
