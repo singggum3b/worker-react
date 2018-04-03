@@ -52,6 +52,9 @@ module.exports = {
         host: "0.0.0.0",
         port: 9000,
         compress: true,
-        historyApiFallback: true
+        historyApiFallback: true,
+        proxy: {
+            "/api": "https://conduit.productionready.io/api"
+        }
     },
 };
