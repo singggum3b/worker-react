@@ -2,6 +2,7 @@ import { observable, action } from "mobx";
 import { TodoStore } from "../store-domain/todo.store";
 import {UIFooter, UITodoList, UITodoToggle} from "./ui-model";
 import { History } from "history";
+import {TagStore} from "../store-domain/tag.store";
 
 export class BaseStore {
     public indexStore: IndexStore;
@@ -14,11 +15,13 @@ export class BaseStore {
 export class IndexStore {
     public todoStore: TodoStore;
     public uiStore: UIStore;
+    public tagStore: TagStore;
     public routerStore: RouterStore;
     public history: History;
 
     constructor(history: History) {
         this.history = history;
+        this.tagStore = new TagStore(this);
         this.routerStore = new RouterStore(this);
         this.todoStore = new TodoStore(this);
         this.uiStore = new UIStore(this);

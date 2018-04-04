@@ -1,70 +1,91 @@
 import {Tag} from "./tag.class";
 import {create, ISelfEmitStream} from "../utils/most";
-import {fromPromise, just, Stream} from "most";
+import {Stream} from "most";
 import {observable} from "mobx";
+import {IndexStore} from "../store-ui";
 
 interface IAPIStreamFactoryResult {
-    pendingStream: Stream<string>,
+    pendingStream: Stream<string[]>,
     requestStream: Stream<Response>
 }
 
 interface IStreamFactoryOption {
-    skipRepeat?: boolean
+    skipRepeat: boolean
 }
 
-function apiCallStreamFactory(src: Stream<string>, option: IStreamFactoryOption = {}): IAPIStreamFactoryResult {
+interface IPendingRequestSeed {
+    url: string,
+    request: Promise<Response>
+}
+
+function apiCallStreamFactory(
+    src: Stream<string>, option: IStreamFactoryOption = { skipRepeat: true },
+): IAPIStreamFactoryResult {
+
     const urlStream = option.skipRepeat ? src.skipRepeats() : src;
-    const requestStream = urlStream.loop((pending: { url: string, s: Stream<Response> }[], url: string) => {
+    const reqStream: Stream<Response> = urlStream.loop((pending: IPendingRequestSeed[], url: string) => {
         const pendingRequest = pending.find(s => s.url === url);
-        if (pendingRequest) {
+
+        if (pendingRequest && option.skipRepeat) {
             return {
-                seed: pendingRequest,
-                value: pendingRequest.s,
+                seed: pending,
+                value: pendingRequest.request,
             }
         }
-        const newRequestStream = fromPromise(fetch(url));
-        newRequestStream.observe(() => {
-            pending = pending.filter(s => s.s === newRequestStream);
-        }).catch((e) => {
-            console.error(e);
-            pending = pending.filter(s => s.s === newRequestStream);
+        const newRequest = fetch(url);
+        newRequest.then((_) => {
+            pending = pending.filter(p => p.request !== newRequest);
+        }, reason => {
+            console.error(reason);
+            pending = pending.filter(p => p.request !== newRequest);
+        });
+
+        pending.push({
+            url,
+            request: newRequest,
         });
 
         return {
-            seed: pending.push({
-                url,
-                s: newRequestStream,
-            }),
-            value: fromPromise(fetch(url)),
+            seed: pending,
+            value: newRequest,
         }
-    }, []);
+    }, []).awaitPromises();
 
     return {
-        requestStream,
-        pendingStream,
+        requestStream: reqStream,
+        pendingStream: urlStream.merge(reqStream.map(r => r.url.replace(window.location.origin, "")))
+            .scan((pending: string[], url: string) => {
+                console.log(pending, url);
+                const hasPending = pending.find(p => p === url);
+                if (hasPending) {
+                    return pending.filter(p => p !== url);
+                }
+                pending.push(url);
+                return pending;
+        }, []),
     }
 }
 
 export class TagStore {
 
     @observable public static tagList: Tag[];
-    public static loadTagListRequest: ISelfEmitStream<string> = create("loadTagListRequest");
-    public static streamAPITagList: Stream<Tag[]> = TagStore.createStreamAPITagList();
-    public static pendingAPICall: Stream<string>;
+    public static streamAskTagList: ISelfEmitStream<string> = create("streamAskTagList");
+    public static streamAPITagList: Stream<Tag[]>;
+    public static streamPendingAPICall: Stream<string[]>;
 
-    private static createStreamAPITagList(): Stream<Tag[]> {
-        return TagStore.loadTagListRequest
-            .skipRepeats()
-            .scan((pending: [], url: string) => {
-
-            }, [])
-
+    public static loadTagFromAPI(): void {
+        TagStore.streamAskTagList.emit("/api/tags");
     }
 
-    constructor() {}
+    public store: IndexStore;
 
-    public loadTagFromAPI(): void {
-        TagStore.loadTagListRequest.emit("/api/tags");
+    constructor(store: IndexStore) {
+        this.store = store;
     }
 
 }
+const { pendingStream, requestStream } = apiCallStreamFactory(TagStore.streamAskTagList, { skipRepeat: false });
+
+TagStore.streamPendingAPICall = pendingStream;
+TagStore.streamAPITagList = requestStream.map(r => r.json()).awaitPromises();
+TagStore.streamPendingAPICall.observe((p) => console.log(p));

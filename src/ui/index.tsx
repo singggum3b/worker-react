@@ -9,9 +9,14 @@ import { IndexStore } from "../store-ui";
 
 import { MobxRouterIntegration } from "./mobx-router";
 import TagList from "./components/tag-list";
+import {TagStore} from "../store-domain/tag.store";
 
 const history = createBrowserHistory();
 export const store = new IndexStore(history);
+
+TagStore.loadTagFromAPI();
+TagStore.loadTagFromAPI();
+TagStore.loadTagFromAPI();
 
 function wrapper(props: any): React.ReactNode {
     return [
