@@ -1,16 +1,14 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { observer, Observer } from "mobx-react";
+import { observer } from "mobx-react";
 
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
 import { IndexStore } from "../store-ui";
 
-import TodoList from "./components/todo-list";
-import TodoInput from "./components/todo-input";
-import TodoFooter from "./components/todo-footer";
 import { MobxRouterIntegration } from "./mobx-router";
+import TagList from "./components/tag-list";
 
 const history = createBrowserHistory();
 export const store = new IndexStore(history);
@@ -37,32 +35,49 @@ export function UI(): void {
 
 const APP = observer(function App(): any {
     return (
-        <section className="todoapp" >
-            {/*<Counter key="counter" data={store.tripStore.tripList} />*/}
-            <header className="header">
-                <h1>todos</h1>
-                <TodoInput addTodo={store.todoStore.addTodo} />
-            </header>
-            <section className="main">
-                <Observer>
-                    {(): any => (
-                    !store.uiStore.todoToggle.hide && [
-                        <input key="toggle-button" id="toggle-all"
-                               className="toggle-all"
-                               type="checkbox"
-                               checked={store.uiStore.todoToggle.checked}
-                               onChange={store.uiStore.todoToggle.toggle}
-                        />,
-                        <label key="toggle-button-label" htmlFor="toggle-all">Mark all as complete</label>,
-                    ]
-                    )}
-                </Observer>
-                <TodoList key="todolist" todoList={store.uiStore.todoListComponent.todoList} />
-            </section>
-            <TodoFooter
-                state={store.uiStore.footer}
-                clearCompletedTodo={store.todoStore.clearCompletedTodo}
-            />
+        <section className="home-page" >
+            <div className="banner">
+                <div className="container">
+                    <h1 className="logo-font">conduit</h1>
+                    <p>A place to share your knowledge.</p>
+                </div>
+            </div>
+            <div className="container page">
+                <div className="row">
+                    <div className="col-md-9">
+                        <div className="feed-toggle">
+                            <ul className="nav nav-pills outline-active">
+                                <li className="nav-item">
+                                    <a className="nav-link disabled" href="">Your Feed</a>
+                                </li>
+                                <li className="nav-item">
+                                    <a className="nav-link active" href="">Global Feed</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="article-preview">
+                            <div className="article-meta">
+                                <a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
+                                <div className="info">
+                                    <a href="" className="author">Eric Simons</a>
+                                    <span className="date">January 20th</span>
+                                </div>
+                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
+                                    <i className="ion-heart"></i> 29
+                                </button>
+                            </div>
+                            <a href="" className="preview-link">
+                                <h1>How to build webapps that scale</h1>
+                                <p>This is the description for the post.</p>
+                                <span>Read more...</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div className="col-md-3">
+                        <TagList />
+                    </div>
+                </div>
+            </div>
         </section>
     );
 });
