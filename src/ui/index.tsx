@@ -9,18 +9,14 @@ import { IndexStore } from "../store-ui";
 
 import { MobxRouterIntegration } from "./mobx-router";
 import TagList from "./components/tag-list";
-import {TagStore} from "../store-domain/tag.store";
+import ArticleList from "./components/article-list";
 
 const history = createBrowserHistory();
 export const store = new IndexStore(history);
 
-TagStore.loadTagFromAPI();
-TagStore.loadTagFromAPI();
-TagStore.loadTagFromAPI();
-
 function wrapper(props: any): React.ReactNode {
     return [
-        <React.StrictMode  key="app">
+        <React.StrictMode key="app">
             <APP />
         </React.StrictMode>,
         <MobxRouterIntegration key="mri" {...props} store={store} />,
@@ -60,26 +56,10 @@ const APP = observer(function App(): any {
                                 </li>
                             </ul>
                         </div>
-                        <div className="article-preview">
-                            <div className="article-meta">
-                                <a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
-                                <div className="info">
-                                    <a href="" className="author">Eric Simons</a>
-                                    <span className="date">January 20th</span>
-                                </div>
-                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                                    <i className="ion-heart"></i> 29
-                                </button>
-                            </div>
-                            <a href="" className="preview-link">
-                                <h1>How to build webapps that scale</h1>
-                                <p>This is the description for the post.</p>
-                                <span>Read more...</span>
-                            </a>
-                        </div>
+                        <ArticleList model={store.uiStore.articleList} />
                     </div>
                     <div className="col-md-3">
-                        <TagList />
+                        <TagList model={store.uiStore.tagList} />
                     </div>
                 </div>
             </div>

@@ -1,13 +1,13 @@
+import {TagStore} from "./tag.store";
+
 export class Tag {
 
-    public static fromAPI(tags: string[]): Tag[] {
-        return tags.map(name => new Tag(name))
-    }
-
     public name: string;
+    public store: TagStore;
 
-    constructor(name: string) {
-        this.name = name
+    constructor(name: string, store: TagStore) {
+        this.name = name;
+        this.store = store;
     }
 
 }

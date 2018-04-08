@@ -12,6 +12,7 @@ module.exports = {
     mode: isProduction ? "production" : "development",
     devtool: "source-map",
     target: "web",
+    watch: true,
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".ts", ".tsx", ".js"]
@@ -54,7 +55,11 @@ module.exports = {
         compress: true,
         historyApiFallback: true,
         proxy: {
-            "/api": "https://conduit.productionready.io/api"
+            "/api": {
+                target: "https://conduit.productionready.io",
+                secure: false,
+                changeOrigin: true,
+            }
         }
     },
 };

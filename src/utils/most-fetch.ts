@@ -1,21 +1,32 @@
-import {empty, from, just, mergeArray, Stream} from "most";
+import {fromPromise, Stream} from "most";
 
-interface IAPIStreamFactoryResult {
+export interface IFetchStreamInput { 0: string | Request , 1?: RequestInit }
+
+export interface IAPIStreamFactoryResult {
     pendingStream: Stream<IFetchStreamInput[]>,
     requestStream: Stream<Response>
 }
 
-interface IStreamFactoryOption {
+export interface IStreamFactoryOption {
     skipRepeat?: boolean,
     skipPending?: boolean
 }
 
-export interface IFetchStreamInput { 0: string | Request , 1?: RequestInit }
-interface IFetchStreamOutput { 0: Stream<IPendingRequestSeed[]>, 1: Stream<Promise<[IFetchStreamInput, Response]>> }
+type IFetchStreamOutput = Promise<[IFetchStreamInput, Response]>;
 
 interface IPendingRequestSeed {
     url: IFetchStreamInput,
-    request: Promise<[IFetchStreamInput, Response]>
+    request: IFetchStreamOutput,
+    isCached: boolean,
+}
+
+function arrayRemoveIf(array: any[], callback: (a: any, i: number) => boolean): void {
+    let i = array.length;
+    while (i--) {
+        if (callback(array[i], i)) {
+            array.splice(i, 1);
+        }
+    }
 }
 
 function compareFetchInput(a: IFetchStreamInput, b: IFetchStreamInput): boolean {
@@ -29,7 +40,7 @@ function compareFetchInput(a: IFetchStreamInput, b: IFetchStreamInput): boolean 
     return true;
 }
 
-function fetchCall(url: IFetchStreamInput): Promise<[IFetchStreamInput, Response]> {
+function fetchCall(url: IFetchStreamInput): IFetchStreamOutput {
     return fetch(url[0], url[1]).then((res) => {
         return [url, res] as [IFetchStreamInput, Response];
     });
@@ -39,44 +50,38 @@ export function apiCallStreamFactory(
     src: Stream<IFetchStreamInput>, option: IStreamFactoryOption = { skipRepeat: true, skipPending: true },
 ): IAPIStreamFactoryResult {
 
+    const pendingSeed: IPendingRequestSeed[]  = [];
     const urlStream = (option.skipRepeat ? src.skipRepeatsWith(compareFetchInput) : src).multicast();
-    const reqStream: Stream<IFetchStreamOutput> = urlStream.
-    loop((pending: Stream<IPendingRequestSeed[]>, url: IFetchStreamInput) => {
-        const srcStream = pending.take(1);
-
-        const newFetchStream: Stream<Promise<[IFetchStreamInput, Response]>> = srcStream
-            .skipWhile((s) => s.some((r) => compareFetchInput(r.url, url)))
-            .constant(url)
-            .map(fetchCall).multicast();
-
-        const cachedFetchStream: Stream<Promise<[IFetchStreamInput, Response]>> = srcStream
-            .takeWhile((s) => s.some((r) => compareFetchInput(r.url, url)))
-            .chain(p => from(p))
-            .filter(p => p.url === url)
-            .map((p) => {
-                return p.request;
-            }).multicast();
-
-        const fetchStream = (option.skipPending ?
-            newFetchStream.merge(cachedFetchStream) : just(url).map(fetchCall)).multicast();
-
-        const addPendingStream: Stream<IPendingRequestSeed[]> = (option.skipPending ? newFetchStream : fetchStream).map((r) => [{url, request: r}]);
-        const removePendingStream: Stream<IPendingRequestSeed[]> = fetchStream.awaitPromises().constant([]);
-        const addRemoveStream: Stream<IPendingRequestSeed[]> = mergeArray([addPendingStream, removePendingStream]);
-
-        pending = srcStream.combine((p, s) => {
-            return p.concat(s);
-        }, addRemoveStream).multicast();
-
-        return {
-            seed: pending,
-            value: [pending, fetchStream] as IFetchStreamOutput,
+    const reqStream: Stream<IPendingRequestSeed> = urlStream.map((url) => {
+        const cached = pendingSeed.find(s => compareFetchInput(s.url, url));
+        if (cached && option.skipPending) {
+            return {
+                ...cached,
+                isCached: true,
+            };
         }
 
-    }, empty().startWith([])).multicast();
+        return {
+            request: fetchCall(url),
+            url,
+            isCached: false,
+        }
+    }).multicast();
+
+    const nonCachedReqStream = reqStream.filter(r => !r.isCached);
+
+    const pendingStream: Stream<IFetchStreamInput[]> = nonCachedReqStream.tap((s) => {
+        pendingSeed.push(s);
+    }).constant(pendingSeed).merge(
+        nonCachedReqStream.map(r => r.request).chain(fromPromise).tap((s) => {
+            arrayRemoveIf(pendingSeed, (i) => {
+                return i.url === s[0];
+            });
+        }).constant(pendingSeed),
+    ).map(_ => pendingSeed.map(i => i.url)).multicast();
 
     return {
-        requestStream: reqStream.map(r => r[1]).join().awaitPromises().map(t => t[1]).multicast(),
-        pendingStream: reqStream.map(r => r[0]).join().map(p => p.map(t => t.url)).multicast(),
+        requestStream: reqStream.map(r => r.request).awaitPromises().map(r => r[1]).multicast(),
+        pendingStream,
     };
 }
