@@ -5,6 +5,9 @@ import {Tag} from "../store-domain/tag.class";
 import {IFetchStreamInput} from "../utils/most-fetch";
 import {Article} from "../store-domain/article.class";
 import {IArticleAPIOption} from "../store-domain/article.store";
+import {create, ISelfEmitStream} from "../utils/most";
+import {copyFields} from "../utils/tools";
+import {SyntheticEvent} from "react";
 
 export class UITagList {
 
@@ -42,16 +45,34 @@ export class UIArticleList {
     @observable.ref public tag?: Tag;
     @observable public pageNumber = 1;
     @observable public requestHash?: string;
+
+    public streamLoadArticle: ISelfEmitStream<IArticleAPIOption> = create("streamLoadArticle");
+
     public uiPagination: UIArticleListPagination;
 
     constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
-        reaction(() => [this.tag, this.pageNumber], (_) => {
-            console.log(_);
-            if (this.articleList.length === 0 || (this.articleList.length < this.articlePerPage)) {
-                this.loadArticleList();
-            }
+
+        reaction(() => {
+            const o: IArticleAPIOption = {
+                tag: (this.tag || { name: undefined}).name,
+                offset: (this.pageNumber - 1) * this.articlePerPage,
+                limit: this.articlePerPage,
+            };
+            return o;
+        }, (opts) => {
+            this.streamLoadArticle.emit(opts);
         });
+
+        this.streamLoadArticle.scan((prevOption: IArticleAPIOption, nextOption): IArticleAPIOption => {
+            return copyFields(prevOption, nextOption);
+        }, {
+            offset: 0,
+            limit: this.articlePerPage,
+        }).observe(action("UIArticleList.loadArticle", (opts) => {
+            this.requestHash = this.indexStore.articleStore.loadArticle(opts);
+        }));
+
         this.uiPagination = new UIArticleListPagination(this);
     }
 
@@ -82,27 +103,19 @@ export class UIArticleList {
     }
 
     @action.bound
-    public loadArticleList(opt?: IArticleAPIOption): void {
-        this.requestHash = this.indexStore.articleStore.loadArticle({
-            tag: (this.tag || { name: undefined }).name,
-            limit: this.articlePerPage,
-            offset: (this.pageNumber - 1) * this.articlePerPage,
-            ...opt,
-        });
-        console.log(this.requestHash);
+    public refresh(): void {
+        this.streamLoadArticle.emit({});
     }
 
     @action.bound
     public setTag(t: Tag): void {
         this.tag = t;
-        this.setPage(1);
-        this.loadArticleList();
+        this.pageNumber = 1;
     }
 
     @action.bound
     public setPage(n: number): void {
         this.pageNumber = n;
-        this.loadArticleList();
     }
 }
 
@@ -117,8 +130,8 @@ export class UIArticleListPagination {
         return this.parent.pageCount;
     }
 
-    public setPage = (n: number): void => {
-        this.parent.setPage(n);
+    public setPage = (e: SyntheticEvent<{value: number}>): void => {
+        this.parent.setPage(e.currentTarget.value);
     }
 }
 

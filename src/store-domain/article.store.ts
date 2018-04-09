@@ -6,7 +6,6 @@ import {action, IObservableArray, observable, ObservableMap} from "mobx";
 import {Article, IArticleJSON} from "./article.class";
 
 export interface IArticleAPIOption {
-    [query: string]: string | number | undefined,
     tag?: string,
     author?: string,
     favorited?: string,
@@ -72,7 +71,10 @@ export class ArticleStore {
         const url = new URL(window.location.origin);
         url.pathname = "/api/articles";
         if (opts) {
-            Object.keys(opts).forEach(key => url.searchParams.append(key, opts[key] ? opts[key]!.toString() : ""));
+            Object.keys(opts).forEach(key => {
+                const optValue = (opts as any)[key];
+                (optValue !== undefined) && url.searchParams.append(key, optValue)
+            });
         }
         const newInput = [url.toString()] as IFetchStreamInput;
         this.streamCallArticle.emit(newInput);

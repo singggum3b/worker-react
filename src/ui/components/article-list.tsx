@@ -46,7 +46,7 @@ class ArticleItem extends React.Component<IItemProps> {
 class ArticleList extends React.Component<IProps> {
 
     public componentDidMount(): void {
-        this.props.model.loadArticleList();
+        this.props.model.refresh();
     }
 
     @computed get model(): UIArticleList {
@@ -71,7 +71,7 @@ const Pagination = observer((props): React.ReactElement<{ model: UIArticleListPa
     const res = [];
     for (let i = 1; i <= model.pageCount; i++) {
         res.push(
-            <li key={i} className="page-item" onClick={(_): void => model.setPage(i)}>
+            <li value={i} key={i} className="page-item" onClick={model.setPage}>
                 <a className="page-link">{i}</a>
             </li>,
         );

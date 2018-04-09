@@ -120,7 +120,7 @@ export function apiCallStreamFactory(
     return {
         requestStream: reqStream.map(r => r.request)
             .awaitPromises()
-            .map(r => [r[1], r[2]] as [Response, requestHash])
+            .map(r => [r[1].clone(), r[2]] as [Response, requestHash])
             .multicast(),
         pendingStream,
     };
