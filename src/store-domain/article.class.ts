@@ -18,6 +18,9 @@ export class Article {
     public favorited: boolean = false;
     public favoritesCount: number = 0;
     public author: Author = new Author();
+    public readonly resourceHash: {
+        [requestHash: string]: boolean,
+    } = {};
 
     public fromJSON(s: IArticleJSON): this {
         const { createdAt, updatedAt, author, ...rest } = s;
@@ -25,6 +28,16 @@ export class Article {
         this.createdAt = new Date(createdAt);
         this.updatedAt = new Date(updatedAt);
         this.author.fromJSON(s.author);
+        return this;
+    }
+
+    public addResourceHash(hash: string): this {
+        this.resourceHash[hash] = true;
+        return this;
+    }
+
+    public removeResourceHash(hash: string): this {
+        delete this.resourceHash[hash];
         return this;
     }
 }

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { observer } from "mobx-react";
-import {UIArticleList} from "../../store-ui/ui-model";
+import {UIArticleList, UIArticleListPagination} from "../../store-ui/ui-model";
 import {computed} from "mobx";
 import {Article} from "../../store-domain/article.class";
 
@@ -55,14 +55,35 @@ class ArticleList extends React.Component<IProps> {
 
     public render(): React.ReactNode {
 
-        return (
-            <div className="tag-list">
+        return [
+            <React.Fragment key="article-list" >
                 {this.model.articleList.map((a) => (
-                    <ArticleItem model={a} />
+                    <ArticleItem key={a.slug} model={a} />
                 ))}
-            </div>
-        )
+            </React.Fragment>,
+            <Pagination key="paginator" model={this.model.uiPagination} />,
+        ]
     }
 }
+
+const Pagination = observer((props): React.ReactElement<{ model: UIArticleListPagination}> => {
+    const { model } = props;
+    const res = [];
+    for (let i = 1; i <= model.pageCount; i++) {
+        res.push(
+            <li key={i} className="page-item" onClick={(_): void => model.setPage(i)}>
+                <a className="page-link">{i}</a>
+            </li>,
+        );
+    }
+
+    return (
+        <nav>
+            <ul className="pagination">
+                {res}
+            </ul>
+        </nav>
+    )
+});
 
 export default ArticleList;

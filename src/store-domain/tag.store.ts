@@ -40,7 +40,7 @@ const { pendingStream, requestStream } = apiCallStreamFactory(
 );
 
 TagStore.streamPendingAPICall = pendingStream;
-TagStore.streamAPITagList = requestStream;
+TagStore.streamAPITagList = requestStream.map(r => r[0]);
 TagStore.streamPendingAPICall.observe(action("updatePendingList", (x: IFetchStreamInput[]) => {
     TagStore.pendingRequest.replace(x);
 }));

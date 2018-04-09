@@ -56,7 +56,7 @@ class TagList extends React.Component<IProps> {
         return (
             <div className="tag-list">
                 {this.model.tagList.map((t) => (
-                    <TagItem model={t} />
+                    <TagItem key={t.id} model={t} />
                 ))}
             </div>
         )
