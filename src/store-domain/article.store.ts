@@ -4,6 +4,7 @@ import {create, ISelfEmitStream} from "../utils/most";
 import {fromPromise, Stream} from "most";
 import {action, IObservableArray, observable, ObservableMap} from "mobx";
 import {Article, IArticleJSON} from "./article.class";
+import {resourceFactory} from "../utils/most-resource";
 
 export interface IArticleAPIOption {
     tag?: string,
@@ -64,6 +65,15 @@ export class ArticleStore {
                     articlesCount,
                 });
             }));
+
+        const {
+            responseStream,
+            queryStream,
+        } = resourceFactory<Article, {}>({
+            name: "Article",
+            model: Article,
+            sampleQuery: {},
+        });
     }
 
     @action.bound

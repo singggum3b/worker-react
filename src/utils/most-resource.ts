@@ -10,27 +10,27 @@ interface IQuery {
     [key: string]: number | string | boolean,
 }
 
-interface IResourceFactoryOption<T extends IClassType<T>, K extends IQuery> {
+interface IResourceFactoryOption<T, K extends IQuery> {
     name: string,
-    model: T,
+    model: IClassType<T>,
     sampleQuery: K,
-    cacheInvalidator: (output: T[]) => boolean,
+    cacheInvalidator: (query: IQuery, output: T[]) => boolean,
     cacheStorage?: ICacheStore<T>,
 }
 
-interface IResourceFactoryOutput<T extends IClassType<T>, K extends IQuery> {
+interface IResourceFactoryOutput<T, K extends IQuery> {
     queryStream: ISelfEmitStream<K>,
     responseStream: Stream<Promise<T[]>>
 }
 
-export interface ICacheStore<T extends IClassType<T>> {
+export interface ICacheStore<T> {
     getSingle: (q: IQuery) => T[],
     getIntersect: (q: IQuery[]) => T[],
     getUnion: (q: IQuery[]) => T[],
     add: (q: IQuery, v: T[]) => void,
 }
 
-class CacheStore<T extends IClassType<T>> implements ICacheStore<T> {
+class CacheStore<T> implements ICacheStore<T> {
     private cache: WeakMap<IQuery, T[]>;
     private hashQueryMap: {[key: string]: IQuery} = {};
 
@@ -79,7 +79,7 @@ class CacheStore<T extends IClassType<T>> implements ICacheStore<T> {
     }
 }
 
-export function resourceFactory<T extends IClassType<T>, K extends IQuery>(opts: IResourceFactoryOption<T, K>):
+export function resourceFactory<T, K extends IQuery>(opts: IResourceFactoryOption<T, K>):
     IResourceFactoryOutput<T, K> {
 
     const cacheStore: ICacheStore<T> = opts.cacheStorage || new CacheStore<T>();
@@ -87,7 +87,7 @@ export function resourceFactory<T extends IClassType<T>, K extends IQuery>(opts:
     const queryStream = create<K>(opts.name);
     const responseStream: Stream<Promise<T[]>> = queryStream.map((q: K) => {
         const response = cacheStore.getSingle(q);
-        if (opts.cacheInvalidator(response)) {
+        if (opts.cacheInvalidator(q, response)) {
             return Promise.resolve(response);
         }
         return Promise.resolve([]);
