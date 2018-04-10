@@ -1,26 +1,34 @@
 import {Stream} from "most";
 import {create, ISelfEmitStream} from "./most";
 import * as objHash from "object-hash";
+import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "./most-fetch";
 
 interface IClassType<T> {
     new(...arg: any[]): T;
 }
 
 interface IQuery {
-    [key: string]: number | string | boolean,
+    [key: string]: number | string | boolean | undefined,
 }
 
-interface IResourceFactoryOption<T, K extends IQuery> {
+export type CacheInvalidator<T, K extends IQuery> = (r: T[], i: K) => boolean
+
+interface IResourceFactoryOption<T> {
     name: string,
     model: IClassType<T>,
-    sampleQuery: K,
-    cacheInvalidator: (query: IQuery, output: T[]) => boolean,
     cacheStorage?: ICacheStore<T>,
+    rawProvider?: IRawJSONProvider,
+    processJSON(json: any): any[],
+}
+
+interface IRawJSONProvider {
+    inputStream: ISelfEmitStream<IQuery>,
+    outputStream: Stream<[Response, requestHash]>
 }
 
 interface IResourceFactoryOutput<T, K extends IQuery> {
-    queryStream: ISelfEmitStream<K>,
-    responseStream: Stream<Promise<T[]>>
+    queryStream: ISelfEmitStream<[K, CacheInvalidator<T, K>]>,
+    resourceStream: Stream<Promise<T[]>>
 }
 
 export interface ICacheStore<T> {
@@ -79,15 +87,22 @@ class CacheStore<T> implements ICacheStore<T> {
     }
 }
 
-export function resourceFactory<T, K extends IQuery>(opts: IResourceFactoryOption<T, K>):
+export function resourceFactory<T, K extends IQuery>(opts: IResourceFactoryOption<T>):
     IResourceFactoryOutput<T, K> {
 
     const cacheStore: ICacheStore<T> = opts.cacheStorage || new CacheStore<T>();
 
-    const queryStream = create<K>(opts.name);
-    const responseStream: Stream<Promise<T[]>> = queryStream.map((q: K) => {
-        const response = cacheStore.getSingle(q);
-        if (opts.cacheInvalidator(q, response)) {
+    const queryStream = create<[K, CacheInvalidator<T, K>]>(opts.name);
+
+    const streamRawCall = create<IFetchStreamInput>("streamRawCall");
+    const {} = apiCallStreamFactory(streamRawCall, {
+        useCache: true,
+        requestHasher: objHash,
+    });
+
+    const resourceStream: Stream<Promise<T[]>> = queryStream.map((q) => {
+        const response = cacheStore.getSingle(q[0]);
+        if (q[1](response, q[0])) {
             return Promise.resolve(response);
         }
         return Promise.resolve([]);
@@ -95,6 +110,6 @@ export function resourceFactory<T, K extends IQuery>(opts: IResourceFactoryOptio
 
     return {
         queryStream,
-        responseStream,
+        resourceStream,
     }
 }

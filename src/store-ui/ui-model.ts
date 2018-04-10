@@ -70,11 +70,18 @@ export class UIArticleList {
             offset: 0,
             limit: this.articlePerPage,
         }).observe(action("UIArticleList.loadArticle", (opts) => {
-            this.requestHash = this.indexStore.articleStore.loadArticle(opts);
+            this.indexStore.articleStore.loadArticle(opts, this.articleListInvalidator);
         }));
 
         this.uiPagination = new UIArticleListPagination(this);
     }
+
+    private articleListInvalidator = (a: Article[], _: IArticleAPIOption): boolean => {
+        if (a.length < this.articlePerPage) {
+            return false;
+        }
+        return true;
+    };
 
     @computed get pageCount(): number {
         if (!this.requestHash) { return -1; }
