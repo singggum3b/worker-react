@@ -11,7 +11,8 @@ export class ArticleStore {
     public streamArticleInstance: Stream<Promise<[IArticleAPIOption, Article[]]>>;
     public streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
     public readonly articlesList = new WeakMap<IArticleAPIOption, Article[]>();
-    @observable public latestOption: IObservableValue<any> = observable.shallowBox({ ref: {}});
+    public readonly latestOption: IObservableValue<IArticleAPIOption>
+        = observable.box({}, { deep: false, name: "ArticleStore.latestOption" });
 
     public store: IndexStore;
     public metaData: ObservableMap<requestHash, IArticleAPIMetaData>
@@ -44,8 +45,7 @@ export class ArticleStore {
         resourceStream.awaitPromises()
             .observe(action("updateArticleList.Store", (x: [IArticleAPIOption, Article[]]) => {
                 this.articlesList.set(x[0], x[1]);
-                this.latestOption.set({ ref: x[0]});
-                console.log(this.latestOption);
+                this.latestOption.set(x[0]);
             }));
     }
 

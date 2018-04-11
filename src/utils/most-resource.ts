@@ -116,7 +116,7 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
         }
 
         const newRawRes = requestStream.since(streamRawCall).take(1);
-        const newInstRes = newRawRes.map((r) => r[0].json()).awaitPromises()
+        const newInstRes = newRawRes.map((r) => r[0].clone().json()).awaitPromises()
             .map((json: any) => {
                 return opts.processJSON(json).map((jsonItem: any) => {
                     return opts.model.fromJSON(jsonItem);

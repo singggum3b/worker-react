@@ -14,7 +14,6 @@ export class MobxRouterIntegration extends React.PureComponent<IMobxRouterIntegr
 
     public static getDerivedStateFromProps(nextProps: IMobxRouterIntegrationProps): null {
         MobxRouterIntegration.updateLocation(nextProps);
-        console.log("sdcdscsd");
         return null;
     }
 

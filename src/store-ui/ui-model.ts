@@ -1,13 +1,12 @@
 import {IndexStore} from "./index";
 import {action, computed, observable, reaction} from "mobx";
-// import { expr } from "mobx-utils";
 import {TagStore} from "../store-domain/tag.store";
 import {Tag} from "../store-domain/tag.class";
 import {IFetchStreamInput} from "../utils/most-fetch";
 import {Article, IArticleAPIOption} from "../store-domain/article.class";
 import {create, ISelfEmitStream} from "../utils/most";
-import {copyFields} from "../utils/tools";
 import {SyntheticEvent} from "react";
+import {expr} from "mobx-utils";
 
 export class UITagList {
 
@@ -49,7 +48,7 @@ export class UIArticleList {
 
     public uiPagination: UIArticleListPagination;
 
-    @observable private currentOption: { ref: IArticleAPIOption } =  observable({ ref: {}});
+    private currentOption = {};
 
     constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
@@ -65,14 +64,10 @@ export class UIArticleList {
             this.streamLoadArticle.emit(opts);
         });
 
-        this.streamLoadArticle.scan((prevOption: IArticleAPIOption, nextOption): IArticleAPIOption => {
-            return copyFields(prevOption, nextOption);
-        }, {
-            offset: 0,
-            limit: this.articlePerPage,
-        }).observe(action("UIArticleList.loadArticle", (opts) => {
+        this.streamLoadArticle.observe(action("UIArticleList.loadArticle", (opts) => {
+            // console.log(this.indexStore.articleStore.latestOption.set({}));
             this.indexStore.articleStore.loadArticle(opts, this.articleListInvalidator);
-            this.currentOption.ref = opts;
+            this.currentOption = opts;
         }));
 
         this.uiPagination = new UIArticleListPagination(this);
@@ -102,15 +97,15 @@ export class UIArticleList {
     };
 
     @computed get pageCount(): number {
-        if (!this.requestHash) { return -1; }
-        const articleCache = this.indexStore.articleStore.metaData.get(this.requestHash);
-        const articleCount = articleCache ? articleCache.articlesCount : 0;
-        if (!articleCount) { return -1 }
-        return Math.round(articleCount / this.articlePerPage);
+        return 1;
     }
 
     @computed get articleList(): Article[] {
-        return this.indexStore.articleStore.articlesList.get(this.indexStore.articleStore.latestOption.get().ref) || [];
+        const option = expr(() => {
+            return this.indexStore.articleStore.latestOption.get() === this.currentOption ?
+                this.currentOption : undefined;
+        });
+        return this.indexStore.articleStore.articlesList.get(option!) || [];
     }
 
 }

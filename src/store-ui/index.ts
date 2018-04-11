@@ -34,6 +34,7 @@ export class UIStore extends BaseStore {
 
     @observable public tagList = new UITagList(this.indexStore);
     @observable public articleList = new UIArticleList(this.indexStore);
+    @observable public articleList2 = new UIArticleList(this.indexStore);
 
     constructor(indexStore: IndexStore) {
         super(indexStore);
