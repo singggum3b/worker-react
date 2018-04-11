@@ -1,6 +1,23 @@
 import {Author, IAuthorJSON} from "./author.class";
 import {copyFields} from "../utils/tools";
 
+export type IArticleAPIOption = { // tslint:disable-line
+    tag?: string,
+    author?: string,
+    favorited?: string,
+    limit?: number,
+    offset?: number,
+}
+
+export interface IArticleAPIJSONMultiple {
+    articles: IArticleJSON[],
+    articlesCount: number,
+}
+
+export interface IArticleAPIMetaData {
+    articlesCount?: number,
+}
+
 export interface IArticleJSON extends OnlyJSON<Article> {
     createdAt: string;
     updatedAt: string;
@@ -8,6 +25,22 @@ export interface IArticleJSON extends OnlyJSON<Article> {
 }
 
 export class Article {
+
+    public static globalInstanceMap = new Map<Article["id"], Article>();
+
+    public static fromJSON(json: IArticleJSON): Article {
+        const exist = this.globalInstanceMap.get(json.slug);
+        if (exist) {
+            return exist.fromJSON(json);
+        } else {
+            return new Article().fromJSON(json);
+        }
+    }
+
+    public get id(): string {
+        return this.slug;
+    }
+
     public slug: string = "";
     public title: string = "";
     public description: string = "";
@@ -18,9 +51,6 @@ export class Article {
     public favorited: boolean = false;
     public favoritesCount: number = 0;
     public author: Author = new Author();
-    public readonly resourceHash: {
-        [requestHash: string]: boolean,
-    } = {};
 
     public fromJSON(s: IArticleJSON): this {
         const { createdAt, updatedAt, author, ...rest } = s;
@@ -28,16 +58,6 @@ export class Article {
         this.createdAt = new Date(createdAt);
         this.updatedAt = new Date(updatedAt);
         this.author.fromJSON(s.author);
-        return this;
-    }
-
-    public addResourceHash(hash: string): this {
-        this.resourceHash[hash] = true;
-        return this;
-    }
-
-    public removeResourceHash(hash: string): this {
-        delete this.resourceHash[hash];
         return this;
     }
 }

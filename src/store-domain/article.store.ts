@@ -1,40 +1,17 @@
 import {IndexStore} from "../store-ui";
-import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "../utils/most-fetch";
-import {create, ISelfEmitStream} from "../utils/most";
-import {fromPromise, Stream} from "most";
-import {action, IObservableArray, observable, ObservableMap} from "mobx";
-import {Article, IArticleJSON} from "./article.class";
+import {IFetchStreamInput, requestHash} from "../utils/most-fetch";
+import {ISelfEmitStream} from "../utils/most";
+import {Stream} from "most";
+import {action, IObservableValue, observable, ObservableMap} from "mobx";
+import {Article, IArticleAPIJSONMultiple, IArticleAPIMetaData, IArticleAPIOption, IArticleJSON} from "./article.class";
 import {CacheInvalidator, resourceFactory} from "../utils/most-resource";
-
-export type IArticleAPIOption = { // tslint:disable-line
-    tag?: string,
-    author?: string,
-    favorited?: string,
-    limit?: number,
-    offset?: number,
-}
-
-export interface IArticleAPIJSONMultiple {
-    articles: IArticleJSON[],
-    articlesCount: number,
-}
-
-interface IArticleAPIMetaData {
-    articlesCount?: number,
-}
-
-function requestHasher(i: IFetchStreamInput): string {
-    return JSON.stringify(i[0]) + (i[1] ? JSON.stringify(i[1]) : "");
-}
 
 export class ArticleStore {
 
-    public streamArticleList: Stream<[Response, requestHash]>;
-    public streamPendingXHR: Stream<IFetchStreamInput[]>;
-    public streamCallArticle: ISelfEmitStream<IFetchStreamInput> = create("streamCallArticle");
-    public streamArticleInstance: Stream<Promise<Article[]>>;
+    public streamArticleInstance: Stream<Promise<[IArticleAPIOption, Article[]]>>;
     public streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
-    @observable public readonly articlesList: IObservableArray<Article> = observable([]);
+    public readonly articlesList = new WeakMap<IArticleAPIOption, Article[]>();
+    @observable public latestOption: IObservableValue<any> = observable.shallowBox({ ref: {}});
 
     public store: IndexStore;
     public metaData: ObservableMap<requestHash, IArticleAPIMetaData>
@@ -42,30 +19,6 @@ export class ArticleStore {
 
     constructor(store: IndexStore) {
         this.store = store;
-        const { requestStream, pendingStream } = apiCallStreamFactory(this.streamCallArticle, {
-            useCache: true,
-            requestHasher,
-        });
-        this.streamPendingXHR = pendingStream;
-        this.streamArticleList = requestStream;
-
-        this.streamArticleList.map(r => r[0].json().then(x => [x, r[1]] as [IArticleAPIJSONMultiple, requestHash]))
-            .chain(fromPromise)
-            .observe(action("syncArticle", (res: [IArticleAPIJSONMultiple, requestHash]) => {
-                const { articles, articlesCount } = res[0];
-                articles.forEach((a) => {
-                    const cached = this.articlesList.find(ca => ca.slug === a.slug);
-                    if (cached) {
-                        cached.fromJSON(a);
-                    } else {
-                        this.articlesList.push(new Article().fromJSON(a).addResourceHash(res[1]));
-                    }
-                });
-                // Update request metadata
-                this.metaData.set(res[1], {
-                    articlesCount,
-                });
-            }));
 
         const {
             resourceStream,
@@ -74,9 +27,26 @@ export class ArticleStore {
             name: "Article",
             model: Article,
             processJSON: this.processJSON,
+            queryToRequest: (opts: IArticleAPIOption): IFetchStreamInput => {
+                const url = new URL(window.location.origin);
+                url.pathname = "/api/articles";
+                if (opts) {
+                    Object.keys(opts).forEach(key => {
+                        const optValue = (opts as any)[key];
+                        (optValue !== undefined) && url.searchParams.append(key, optValue)
+                    });
+                }
+                return [url.toString()] as IFetchStreamInput;
+            },
         });
         this.streamArticleInstance = resourceStream;
         this.streamArticleQuery = queryStream;
+        resourceStream.awaitPromises()
+            .observe(action("updateArticleList.Store", (x: [IArticleAPIOption, Article[]]) => {
+                this.articlesList.set(x[0], x[1]);
+                this.latestOption.set({ ref: x[0]});
+                console.log(this.latestOption);
+            }));
     }
 
     public processJSON(json: IArticleAPIJSONMultiple): IArticleJSON[] {
@@ -85,17 +55,6 @@ export class ArticleStore {
 
     @action.bound
     public loadArticle(opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void {
-        // const url = new URL(window.location.origin);
-        // url.pathname = "/api/articles";
-        // if (opts) {
-        //     Object.keys(opts).forEach(key => {
-        //         const optValue = (opts as any)[key];
-        //         (optValue !== undefined) && url.searchParams.append(key, optValue)
-        //     });
-        // }
-        // const newInput = [url.toString()] as IFetchStreamInput;
-        // this.streamCallArticle.emit(newInput);
-        // return requestHasher(newInput);
-        this.streamArticleQuery.emit([opts, c])
+        this.streamArticleQuery.emit([opts, c]);
     }
 }

@@ -46,7 +46,7 @@ class ArticleItem extends React.Component<IItemProps> {
 class ArticleList extends React.Component<IProps> {
 
     public componentDidMount(): void {
-        this.props.model.refresh();
+        // this.props.model.refresh();
     }
 
     @computed get model(): UIArticleList {

@@ -1,10 +1,10 @@
 import {IndexStore} from "./index";
 import {action, computed, observable, reaction} from "mobx";
+// import { expr } from "mobx-utils";
 import {TagStore} from "../store-domain/tag.store";
 import {Tag} from "../store-domain/tag.class";
 import {IFetchStreamInput} from "../utils/most-fetch";
-import {Article} from "../store-domain/article.class";
-import {IArticleAPIOption} from "../store-domain/article.store";
+import {Article, IArticleAPIOption} from "../store-domain/article.class";
 import {create, ISelfEmitStream} from "../utils/most";
 import {copyFields} from "../utils/tools";
 import {SyntheticEvent} from "react";
@@ -45,10 +45,11 @@ export class UIArticleList {
     @observable.ref public tag?: Tag;
     @observable public pageNumber = 1;
     @observable public requestHash?: string;
-
     public streamLoadArticle: ISelfEmitStream<IArticleAPIOption> = create("streamLoadArticle");
 
     public uiPagination: UIArticleListPagination;
+
+    @observable private currentOption: { ref: IArticleAPIOption } =  observable({ ref: {}});
 
     constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
@@ -71,9 +72,26 @@ export class UIArticleList {
             limit: this.articlePerPage,
         }).observe(action("UIArticleList.loadArticle", (opts) => {
             this.indexStore.articleStore.loadArticle(opts, this.articleListInvalidator);
+            this.currentOption.ref = opts;
         }));
 
         this.uiPagination = new UIArticleListPagination(this);
+    }
+
+    @action.bound
+    public refresh(): void {
+        this.streamLoadArticle.emit({});
+    }
+
+    @action.bound
+    public setTag(t: Tag): void {
+        this.tag = t;
+        this.pageNumber = 1;
+    }
+
+    @action.bound
+    public setPage(n: number): void {
+        this.pageNumber = n;
     }
 
     private articleListInvalidator = (a: Article[], _: IArticleAPIOption): boolean => {
@@ -92,38 +110,9 @@ export class UIArticleList {
     }
 
     @computed get articleList(): Article[] {
-        if (this.tag && this.requestHash) {
-            return this.articleListByHash;
-        }
-        return this.indexStore.articleStore.articlesList
-            .filter(a => a.resourceHash[this.requestHash || ""]);
+        return this.indexStore.articleStore.articlesList.get(this.indexStore.articleStore.latestOption.get().ref) || [];
     }
 
-    @computed get articleListByTag(): Article[] {
-        return this.indexStore.articleStore.articlesList
-            .filter(t => t.tagList.includes((this.tag || { name: ""}).name));
-    }
-
-    @computed get articleListByHash(): Article[] {
-        return this.indexStore.articleStore.articlesList
-            .filter(t => t.resourceHash[this.requestHash || ""]);
-    }
-
-    @action.bound
-    public refresh(): void {
-        this.streamLoadArticle.emit({});
-    }
-
-    @action.bound
-    public setTag(t: Tag): void {
-        this.tag = t;
-        this.pageNumber = 1;
-    }
-
-    @action.bound
-    public setPage(n: number): void {
-        this.pageNumber = n;
-    }
 }
 
 export class UIArticleListPagination {
