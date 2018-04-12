@@ -6,7 +6,7 @@ import {IFetchStreamInput} from "../utils/most-fetch";
 import {Article, IArticleAPIOption} from "../store-domain/article.class";
 import {create, ISelfEmitStream} from "../utils/most";
 import {SyntheticEvent} from "react";
-import {expr} from "mobx-utils";
+import {IArticleStoreSubscribtion} from "../store-domain/article.store";
 
 export class UITagList {
 
@@ -48,10 +48,12 @@ export class UIArticleList {
 
     public uiPagination: UIArticleListPagination;
 
-    private currentOption = {};
+    private articleStoreSubscribtion: IArticleStoreSubscribtion;
 
     constructor(indexStore: IndexStore) {
         this.indexStore = indexStore;
+
+        this.articleStoreSubscribtion = this.indexStore.articleStore.subscribe();
 
         reaction(() => {
             const o: IArticleAPIOption = {
@@ -66,8 +68,7 @@ export class UIArticleList {
 
         this.streamLoadArticle.observe(action("UIArticleList.loadArticle", (opts) => {
             // console.log(this.indexStore.articleStore.latestOption.set({}));
-            this.indexStore.articleStore.loadArticle(opts, this.articleListInvalidator);
-            this.currentOption = opts;
+            this.articleStoreSubscribtion.loadArticle(opts, this.articleListInvalidator);
         }));
 
         this.uiPagination = new UIArticleListPagination(this);
@@ -75,7 +76,10 @@ export class UIArticleList {
 
     @action.bound
     public refresh(): void {
-        this.streamLoadArticle.emit({});
+        this.streamLoadArticle.emit({
+            offset: 0,
+            limit: this.articlePerPage,
+        });
     }
 
     @action.bound
@@ -101,11 +105,8 @@ export class UIArticleList {
     }
 
     @computed get articleList(): Article[] {
-        const option = expr(() => {
-            return this.indexStore.articleStore.latestOption.get() === this.currentOption ?
-                this.currentOption : undefined;
-        });
-        return this.indexStore.articleStore.articlesList.get(option!) || [];
+        return this.indexStore.articleStore.articlesList
+            .get(this.articleStoreSubscribtion.currentArticleListKey.get()) || [];
     }
 
 }

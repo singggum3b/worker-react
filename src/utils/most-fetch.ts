@@ -5,7 +5,7 @@ export interface IFetchStreamInput { 0: string | Request , 1?: RequestInit }
 
 export interface IAPIStreamFactoryResult {
     pendingStream: Stream<IFetchStreamInput[]>,
-    requestStream: Stream<[Response, requestHash]>
+    requestStream: Stream<[Response, requestHash, IFetchStreamInput]>
 }
 
 export interface IStreamFactoryOption {
@@ -120,7 +120,7 @@ export function apiCallStreamFactory(
     return {
         requestStream: reqStream.map(r => r.request)
             .awaitPromises()
-            .map(r => [r[1].clone(), r[2]] as [Response, requestHash])
+            .map(r => [r[1].clone(), r[2], r[0]] as [Response, requestHash, IFetchStreamInput])
             .multicast(),
         pendingStream,
     };

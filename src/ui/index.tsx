@@ -56,8 +56,12 @@ const APP = observer(function App(): any {
                                 </li>
                             </ul>
                         </div>
-                        <ArticleList model={store.uiStore.articleList} />
-                        <ArticleList model={store.uiStore.articleList2} />
+                        <div>
+                            <ArticleList model={store.uiStore.articleList} />
+                        </div>
+                        <div>
+                            <ArticleList model={store.uiStore.articleList2} />
+                        </div>
                     </div>
                     <div className="col-md-3">
                         <TagList model={store.uiStore.tagList} />

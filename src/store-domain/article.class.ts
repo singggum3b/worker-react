@@ -33,7 +33,9 @@ export class Article {
         if (exist) {
             return exist.fromJSON(json);
         } else {
-            return new Article().fromJSON(json);
+            const newInstance = new Article().fromJSON(json);
+            Article.globalInstanceMap.set(newInstance.id, newInstance);
+            return newInstance;
         }
     }
 
