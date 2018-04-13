@@ -79,6 +79,7 @@ export function apiCallStreamFactory(
         if (cached && opts.skipPending) {
             return {
                 ...cached,
+                url,
                 isCached: true,
             };
         }
@@ -120,8 +121,7 @@ export function apiCallStreamFactory(
     return {
         requestStream: reqStream.map(r => r.request)
             .awaitPromises()
-            .map(r => [r[1].clone(), r[2], r[0]] as [Response, requestHash, IFetchStreamInput])
-            .multicast(),
+            .map(r => [r[1].clone(), r[2], r[0]] as [Response, requestHash, IFetchStreamInput]),
         pendingStream,
     };
 }

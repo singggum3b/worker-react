@@ -16,13 +16,14 @@ export interface IArticleStoreSubscribtion {
 
 export class ArticleStore {
 
-    public streamArticleInstance: Stream<Promise<[IArticleAPIOption, Article[]]>>;
-    public streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
     public readonly articlesList = new WeakMap<IArticleAPIOption, Article[]>();
 
     public store: IndexStore;
     public metaData: ObservableMap<requestHash, IArticleAPIMetaData>
         = observable.map(undefined, { deep: false });
+
+    private streamArticleInstance: Stream<Promise<[IArticleAPIOption, Article[]]>>;
+    private streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
 
     constructor(store: IndexStore) {
         this.store = store;
@@ -61,18 +62,12 @@ export class ArticleStore {
 
         return {
             loadArticle: (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void => {
-                const subscribtion = this.streamArticleInstance.awaitPromises()
-                    .subscribe({
-                        next: action("updateArticleList.Store", (x: [IArticleAPIOption, Article[]]) => {
-                            if (x[0] === opts) {
-                                this.articlesList.set(x[0], x[1]);
-                                currentArticleListKey.set(x[0]);
-                                subscribtion.unsubscribe();
-                            }
-                        }),
-                        error(e): void { console.error(e); subscribtion.unsubscribe(); },
-                        complete(): void { subscribtion.unsubscribe(); },
-                    });
+                this.streamArticleInstance.awaitPromises()
+                    .skipWhile((x) => x[0] !== opts)
+                    .take(1).tap(action((x: [IArticleAPIOption, Article[]]) => {
+                        this.articlesList.set(x[0], x[1]);
+                        currentArticleListKey.set(x[0]);
+                    })).drain();
                 loadArticle(opts, c);
             },
             currentArticleListKey,

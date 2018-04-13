@@ -26,9 +26,11 @@ class ProxyObservable<T> implements Observable<T> {
         const { proxy, revoke } = observe({
             value: null,
         }, (_, value) => {
-            this.subscriberList.forEach((subscriber) => {
+            console.log(value);
+            this.subscriberList.slice(0, 1).forEach((subscriber) => {
                 try {
                     subscriber.next(value);
+                    subscriber.complete();
                 } catch (e) {
                     console.error(e);
                     subscriber.error(e);

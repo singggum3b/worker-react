@@ -67,7 +67,6 @@ export class UIArticleList {
         });
 
         this.streamLoadArticle.observe(action("UIArticleList.loadArticle", (opts) => {
-            // console.log(this.indexStore.articleStore.latestOption.set({}));
             this.articleStoreSubscribtion.loadArticle(opts, this.articleListInvalidator);
         }));
 
@@ -77,6 +76,7 @@ export class UIArticleList {
     @action.bound
     public refresh(): void {
         this.streamLoadArticle.emit({
+            tag: Math.random() + "",
             offset: 0,
             limit: this.articlePerPage,
         });

@@ -1,4 +1,4 @@
-import {from, Stream} from "most";
+import {Stream} from "most";
 import {create, ISelfEmitStream} from "./most";
 import * as objHash from "object-hash";
 import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "./most-fetch";
@@ -106,19 +106,21 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
     const {
         requestStream,
     } = apiCallStreamFactory(streamRawCall, {
+        skipRepeat: false,
         useCache: true,
         requestHasher: objHash,
     });
 
     const resourceStream: Stream<Promise<[K, T[]]>> = queryStream.map((q: [K, CacheInvalidator<T, K>]) => {
+        console.log(q);
         const response = cacheStore.getSingle(q[0]);
         if (q[1](response, q[0])) {
             return Promise.resolve([q[0], response] as [K, T[]]);
         }
 
         const newRequestOption = opts.queryToRequest(q[0]);
-        const newRawRes = requestStream.since(from(q)).filter((i) => {
-            return i[2] === newRequestOption;
+        const newRawRes = requestStream.skipWhile((i) => {
+            return i[2] !== newRequestOption;
         }).take(1);
         const newInstRes = newRawRes
             .map((r) => r[0].clone().json())
@@ -128,8 +130,12 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
                     return opts.model.fromJSON(jsonItem);
                 });
             }).reduce((arr: T[], i: T[]): T[] => {
+                console.log(arr);
                 return arr.concat(i);
-            }, []).then(t => [q[0], t] as [K, T[]]);
+            }, []).then(t => {
+                console.log(t);
+                return [q[0], t] as [K, T[]];
+            });
         // Trigger raw query
         streamRawCall.emit(newRequestOption);
         // Update cache reference
@@ -139,7 +145,7 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
         });
 
         return newInstRes;
-    }).multicast();
+    });
 
     return {
         queryStream,
