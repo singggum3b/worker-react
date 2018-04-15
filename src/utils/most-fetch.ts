@@ -70,7 +70,7 @@ export function apiCallStreamFactory(
     const requestCache: {[key: string]: IFetchStreamOutput} = {};
     const pendingSeed: IPendingRequestSeed[]  = [];
 
-    const urlStream = (opts.skipRepeat ? src.skipRepeatsWith(compareFetchInput) : src).multicast();
+    const urlStream = (opts.skipRepeat ? src.skipRepeatsWith(compareFetchInput) : src);
     const reqStream: Stream<IPendingRequestSeed> = urlStream.map((url) => {
 
         const rHash = opts.requestHasher ? opts.requestHasher(url) : undefined;
@@ -79,6 +79,9 @@ export function apiCallStreamFactory(
         if (cached && opts.skipPending) {
             return {
                 ...cached,
+                request: cached.request.then((res) => {
+                    return [url, res[1], res[2]] as [IFetchStreamInput, Response, requestHash];
+                }),
                 url,
                 isCached: true,
             };
@@ -97,6 +100,12 @@ export function apiCallStreamFactory(
             r = fetchCall(url, rHash || undefined);
         }
 
+        r.then((s) => {
+            arrayRemoveIf(pendingSeed, (i) => {
+                return i.url === s[0];
+            });
+        });
+
         return {
             request: r,
             requestHash: rHash,
@@ -104,18 +113,16 @@ export function apiCallStreamFactory(
             isCached: false,
         };
 
+    }).tap((r) => {
+        if (!r.isCached) {
+            pendingSeed.push(r);
+        }
     }).multicast();
 
     const nonCachedReqStream = reqStream.filter(r => !r.isCached);
 
-    const pendingStream: Stream<IFetchStreamInput[]> = nonCachedReqStream.tap((s) => {
-        pendingSeed.push(s);
-    }).constant(pendingSeed).merge(
-        nonCachedReqStream.map(r => r.request).chain(fromPromise).tap((s) => {
-            arrayRemoveIf(pendingSeed, (i) => {
-                return i.url === s[0];
-            });
-        }).constant(pendingSeed),
+    const pendingStream: Stream<IFetchStreamInput[]> = nonCachedReqStream.constant(pendingSeed).merge(
+        nonCachedReqStream.map(r => r.request).chain(fromPromise).constant(pendingSeed),
     ).map(_ => pendingSeed.map(i => i.url)).multicast();
 
     return {

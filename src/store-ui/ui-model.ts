@@ -1,5 +1,5 @@
 import {IndexStore} from "./index";
-import {action, computed, observable, reaction} from "mobx";
+import {action, computed, IObservableArray, observable, reaction} from "mobx";
 import {TagStore} from "../store-domain/tag.store";
 import {Tag} from "../store-domain/tag.class";
 import {IFetchStreamInput} from "../utils/most-fetch";
@@ -44,6 +44,8 @@ export class UIArticleList {
     @observable.ref public tag?: Tag;
     @observable public pageNumber = 1;
     @observable public requestHash?: string;
+    @observable public articleList: IObservableArray<Article> = observable.array([]);
+
     public streamLoadArticle: ISelfEmitStream<IArticleAPIOption> = create("streamLoadArticle");
 
     public uiPagination: UIArticleListPagination;
@@ -54,6 +56,11 @@ export class UIArticleList {
         this.indexStore = indexStore;
 
         this.articleStoreSubscribtion = this.indexStore.articleStore.subscribe();
+        this.articleStoreSubscribtion.articleStream.observe((r) => {
+            action(() => {
+                this.articleList.replace(r[1]);
+            })();
+        });
 
         reaction(() => {
             const o: IArticleAPIOption = {
@@ -76,7 +83,6 @@ export class UIArticleList {
     @action.bound
     public refresh(): void {
         this.streamLoadArticle.emit({
-            tag: Math.random() + "",
             offset: 0,
             limit: this.articlePerPage,
         });
@@ -102,11 +108,6 @@ export class UIArticleList {
 
     @computed get pageCount(): number {
         return 1;
-    }
-
-    @computed get articleList(): Article[] {
-        return this.indexStore.articleStore.articlesList
-            .get(this.articleStoreSubscribtion.currentArticleListKey.get()) || [];
     }
 
 }

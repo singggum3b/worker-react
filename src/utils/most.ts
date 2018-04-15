@@ -26,11 +26,11 @@ class ProxyObservable<T> implements Observable<T> {
         const { proxy, revoke } = observe({
             value: null,
         }, (_, value) => {
-            console.log(value);
-            this.subscriberList.slice(0, 1).forEach((subscriber) => {
+            this.subscriberList.forEach((subscriber) => {
                 try {
-                    subscriber.next(value);
-                    subscriber.complete();
+                    if (this.subscriberList.some(i => i === subscriber)) {
+                        subscriber.next(value);
+                    }
                 } catch (e) {
                     console.error(e);
                     subscriber.error(e);
@@ -52,8 +52,7 @@ class ProxyObservable<T> implements Observable<T> {
 
         return {
             unsubscribe: (): void => {
-                subscriber.complete();
-                this.subscriberList = this.subscriberList.filter(i => i === subscriber);
+                this.subscriberList = this.subscriberList.filter(i => i !== subscriber);
             },
         }
     }
@@ -63,6 +62,7 @@ class ProxyObservable<T> implements Observable<T> {
     }
 
     public emit = (e: T): void => {
+        console.log("emiting", e);
         this.boxed.value = e;
     }
 }
@@ -73,7 +73,7 @@ export interface ISelfEmitStream<T> extends Stream<T> {
 
 export function create<T extends (string | number | boolean | object)>(name: string): ISelfEmitStream<T> {
     const value = new ProxyObservable<T>(name);
-    const stream = from<T>(value) as ISelfEmitStream<T>;
+    const stream = from<T>(value).tap(e => console.log("output", e)) as ISelfEmitStream<T>;
     stream.emit = value.emit;
     return stream;
 }

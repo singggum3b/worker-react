@@ -1,8 +1,8 @@
 import {IndexStore} from "../store-ui";
 import {IFetchStreamInput, requestHash} from "../utils/most-fetch";
 import {ISelfEmitStream} from "../utils/most";
-import {Stream} from "most";
-import {action, IObservableValue, observable, ObservableMap} from "mobx";
+import {fromPromise, Stream} from "most";
+import {action, observable, ObservableMap} from "mobx";
 import {Article, IArticleAPIJSONMultiple, IArticleAPIMetaData, IArticleAPIOption, IArticleJSON} from "./article.class";
 import {CacheInvalidator, resourceFactory} from "../utils/most-resource";
 
@@ -11,7 +11,7 @@ type LoadArticleSignature = (opts: IArticleAPIOption, c: CacheInvalidator<Articl
 export interface IArticleStoreSubscribtion {
     loadArticle: LoadArticleSignature,
     unsubscribe: () => void,
-    currentArticleListKey: IObservableValue<any>
+    articleStream: Stream<[IArticleAPIOption, Article[]]>,
 }
 
 export class ArticleStore {
@@ -47,8 +47,9 @@ export class ArticleStore {
                 return [url.toString()] as IFetchStreamInput;
             },
         });
-        this.streamArticleInstance = resourceStream;
         this.streamArticleQuery = queryStream;
+        this.streamArticleInstance = resourceStream.multicast();
+        this.streamArticleInstance.chain(fromPromise).forEach((x) => console.log(x));
     }
 
     public processJSON(json: IArticleAPIJSONMultiple): IArticleJSON[] {
@@ -58,21 +59,18 @@ export class ArticleStore {
     public subscribe(): IArticleStoreSubscribtion {
 
         const loadArticle = this.loadArticle;
-        const currentArticleListKey = observable.box({}, {deep: false});
+        let currentOption: IArticleAPIOption | null;
 
         return {
+            articleStream: this.streamArticleInstance.awaitPromises().filter((x) => {
+                return x[0] === currentOption;
+            }),
             loadArticle: (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void => {
-                this.streamArticleInstance.awaitPromises()
-                    .skipWhile((x) => x[0] !== opts)
-                    .take(1).tap(action((x: [IArticleAPIOption, Article[]]) => {
-                        this.articlesList.set(x[0], x[1]);
-                        currentArticleListKey.set(x[0]);
-                    })).drain();
+                currentOption = opts;
                 loadArticle(opts, c);
             },
-            currentArticleListKey,
             unsubscribe: (): void => {
-                this.articlesList.delete(currentArticleListKey.get());
+                currentOption = null;
             },
         }
     }

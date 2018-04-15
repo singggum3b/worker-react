@@ -112,16 +112,16 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
     });
 
     const resourceStream: Stream<Promise<[K, T[]]>> = queryStream.map((q: [K, CacheInvalidator<T, K>]) => {
-        console.log(q);
         const response = cacheStore.getSingle(q[0]);
         if (q[1](response, q[0])) {
             return Promise.resolve([q[0], response] as [K, T[]]);
         }
 
-        const newRequestOption = opts.queryToRequest(q[0]);
-        const newRawRes = requestStream.skipWhile((i) => {
-            return i[2] !== newRequestOption;
-        }).take(1);
+        const newRequestOption = opts.queryToRequest(q[0]) as any;
+        const newRawRes = requestStream.filter(r => {
+            console.log(r[2], newRequestOption, r[2] === newRequestOption);
+            return r[2] === newRequestOption;
+        });
         const newInstRes = newRawRes
             .map((r) => r[0].clone().json())
             .awaitPromises()
@@ -129,11 +129,12 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
                 return opts.processJSON(json).map((jsonItem: any) => {
                     return opts.model.fromJSON(jsonItem);
                 });
-            }).reduce((arr: T[], i: T[]): T[] => {
-                console.log(arr);
+            })
+            .take(1)
+            .reduce((arr: T[], i: T[]): T[] => {
                 return arr.concat(i);
-            }, []).then(t => {
-                console.log(t);
+            }, [])
+            .then(t => {
                 return [q[0], t] as [K, T[]];
             });
         // Trigger raw query
