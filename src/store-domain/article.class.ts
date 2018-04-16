@@ -1,5 +1,6 @@
 import {Author, IAuthorJSON} from "./author.class";
 import {copyFields} from "../utils/tools";
+import {ArticleStore} from "./article.store";
 
 export type IArticleAPIOption = { // tslint:disable-line
     tag?: string,
@@ -26,12 +27,12 @@ export interface IArticleJSON extends OnlyJSON<Article> {
 
 export class Article {
 
-    public static fromJSON(json: IArticleJSON): Article {
+    public static fromJSON(json: IArticleJSON, s: ArticleStore): Article {
         const exist = this.globalInstanceMap.get(json.slug);
         if (exist) {
             return exist.fromJSON(json);
         } else {
-            const newInstance = new Article().fromJSON(json);
+            const newInstance = new Article(s).fromJSON(json);
             Article.globalInstanceMap.set(newInstance.id, newInstance);
             return newInstance;
         }
@@ -50,11 +51,15 @@ export class Article {
     public favoritesCount: number = 0;
     public author: Author = new Author();
 
+    public store: ArticleStore;
+
     public get id(): string {
         return this.slug;
     }
 
-    private constructor() {}
+    private constructor(store: ArticleStore) {
+        this.store = store;
+    }
 
     public fromJSON(s: IArticleJSON): this {
         const { createdAt, updatedAt, author, ...rest } = s;
@@ -65,7 +70,7 @@ export class Article {
         return this;
     }
 
-    public remove(): void {
+    public remove = (): void => {
         Article.globalInstanceMap.delete(this.id);
     }
 }

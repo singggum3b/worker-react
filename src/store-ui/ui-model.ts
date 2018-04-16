@@ -101,6 +101,11 @@ export class UIArticleList {
         this.pageNumber = n;
     }
 
+    @action.bound
+    public removeArticle(a: Article): void {
+        this.articleList.remove(a);
+    };
+
     private articleListInvalidator = (a: Article[], _: IArticleAPIOption): boolean => {
         return a.length >= this.articlePerPage;
     };
@@ -109,6 +114,26 @@ export class UIArticleList {
         return Math.ceil(this.totalArticle / this.articlePerPage);
     }
 
+}
+
+export class UIArticleItem {
+
+    public static fromArticle(a: Article): UIArticleItem {
+        const exist = UIArticleItem.instanceMap.get(a);
+        if (exist) {
+            return exist;
+        }
+        const newInstance = new UIArticleItem(a);
+        UIArticleItem.instanceMap.set(a, newInstance);
+        return newInstance;
+    }
+    private static instanceMap = new WeakMap<Article, UIArticleItem>();
+
+    public readonly article: Article;
+
+    private constructor(a: Article) {
+        this.article = a;
+    }
 }
 
 export class UIArticleListPagination {

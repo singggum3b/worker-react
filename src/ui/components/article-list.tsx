@@ -10,6 +10,7 @@ interface IProps {
 
 interface IItemProps {
     model: Article,
+    parent: UIArticleList,
 }
 
 @observer
@@ -17,6 +18,10 @@ class ArticleItem extends React.Component<IItemProps> {
 
     @computed get model(): Article {
         return this.props.model;
+    }
+
+    public remove = (): void => {
+        this.props.parent.removeArticle(this.model);
     }
 
     public render(): React.ReactNode {
@@ -37,6 +42,7 @@ class ArticleItem extends React.Component<IItemProps> {
                     <p>{this.model.description}</p>
                     <span>Read more...</span>
                 </a>
+                <div onClick={this.remove}>Remove</div>
             </div>
         )
     }
@@ -58,7 +64,7 @@ class ArticleList extends React.Component<IProps> {
         return [
             <React.Fragment key="article-list" >
                 {this.model.articleList.map((a) => (
-                    <ArticleItem key={a.slug} model={a} />
+                    <ArticleItem key={a.slug} model={a} parent={this.model} />
                 ))}
             </React.Fragment>,
             <Pagination key="paginator" model={this.model.uiPagination} />,

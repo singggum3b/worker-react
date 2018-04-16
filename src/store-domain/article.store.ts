@@ -30,6 +30,9 @@ export class ArticleStore {
         } = resourceFactory<Article, IArticleAPIOption>({
             name: "Article",
             model: Article,
+            fromJSON: (json: IArticleJSON): Article => {
+                return Article.fromJSON(json, store.articleStore);
+            },
             processJSON: this.processJSON,
             queryToRequest: (opts: IArticleAPIOption): IFetchStreamInput => {
                 const url = new URL(window.location.origin);

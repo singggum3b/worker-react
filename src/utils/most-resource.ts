@@ -4,12 +4,12 @@ import * as objHash from "object-hash";
 import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "./most-fetch";
 
 interface IClassType<T> {
-    fromJSON: (json: any) => T;
+    fromJSON: (json: any, ...arg: any[]) => T;
 }
 
 interface IModel<T> {
     id: string,
-    fromJSON: (json: any) => T
+    fromJSON: (json: any, ...arg: any[]) => T
 }
 
 interface IQuery {
@@ -25,6 +25,7 @@ interface IResourceFactoryOption<T extends IModel<T>, K extends IQuery> {
     rawProvider?: IRawJSONProvider,
     queryToRequest: (i: K) => IFetchStreamInput,
     processJSON(json: any): any[],
+    fromJSON?(json: any, ...arg: any[]): T,
 }
 
 interface IRawJSONProvider {
@@ -141,7 +142,7 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
             .awaitPromises()
             .map((json: any) => {
                 const instanceList = opts.processJSON(json).map((jsonItem: any) => {
-                    return opts.model.fromJSON(jsonItem);
+                    return opts.fromJSON ? opts.fromJSON(jsonItem) : opts.model.fromJSON(jsonItem);
                 });
                 return [instanceList, json];
             })
