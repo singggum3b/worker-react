@@ -5,7 +5,6 @@ import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "./most-fetch
 
 interface IClassType<T> {
     fromJSON: (json: any) => T;
-    new(...arg: any[]): T;
 }
 
 interface IModel<T> {
@@ -35,7 +34,13 @@ interface IRawJSONProvider {
 
 interface IResourceFactoryOutput<T, K extends IQuery> {
     queryStream: ISelfEmitStream<[K, CacheInvalidator<T, K>]>,
-    resourceStream: Stream<Promise<[K, T[]]>>
+    resourceStream: Stream<Promise<IResourceOutput<T, K>>>
+}
+
+export interface IResourceOutput<T, K extends IQuery> {
+    instanceList: T[],
+    rawJSON: any,
+    query: K,
 }
 
 export interface ICacheStore<T> {
@@ -51,6 +56,10 @@ class CacheStore<T> implements ICacheStore<T> {
 
     constructor() {
         this.cache = new WeakMap();
+    }
+
+    public clear(): void {
+        this.hashQueryMap = {};
     }
 
     public getSingle(q: IQuery): T[] {
@@ -99,6 +108,7 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
     IResourceFactoryOutput<T, K> {
 
     const cacheStore: ICacheStore<T> = opts.cacheStorage || new CacheStore<T>();
+    const rawJSONCache: ICacheStore<any> = new CacheStore<any>();
 
     const queryStream = create<[K, CacheInvalidator<T, K>]>(opts.name);
 
@@ -111,37 +121,47 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
         requestHasher: objHash,
     });
 
-    const resourceStream: Stream<Promise<[K, T[]]>> = queryStream.map((q: [K, CacheInvalidator<T, K>]) => {
+    const resourceStream: Stream<Promise<IResourceOutput<T, K>>> = queryStream.map((q: [K, CacheInvalidator<T, K>]) => {
         const response = cacheStore.getSingle(q[0]);
         if (q[1](response, q[0])) {
-            return Promise.resolve([q[0], response] as [K, T[]]);
+            const rawJSON = rawJSONCache.getSingle(q[0])[0];
+            return Promise.resolve({
+                query: q[0],
+                instanceList: response,
+                rawJSON,
+            });
         }
 
         const newRequestOption = opts.queryToRequest(q[0]) as any;
         const newRawRes = requestStream.filter(r => {
-            console.log(r[2], newRequestOption, r[2] === newRequestOption);
             return r[2] === newRequestOption;
         });
         const newInstRes = newRawRes
             .map((r) => r[0].clone().json())
             .awaitPromises()
             .map((json: any) => {
-                return opts.processJSON(json).map((jsonItem: any) => {
+                const instanceList = opts.processJSON(json).map((jsonItem: any) => {
                     return opts.model.fromJSON(jsonItem);
                 });
+                return [instanceList, json];
             })
             .take(1)
-            .reduce((arr: T[], i: T[]): T[] => {
-                return arr.concat(i);
-            }, [])
-            .then(t => {
-                return [q[0], t] as [K, T[]];
+            .reduce((arr: IResourceOutput<T, K>, i: T[]): IResourceOutput<T, K> => {
+                arr.instanceList = arr.instanceList.concat(i[0]);
+                arr.query = q[0];
+                arr.rawJSON = i[1];
+                return arr;
+            }, {
+                instanceList: [],
+                query: {} as any,
+                rawJSON: null,
             });
         // Trigger raw query
         streamRawCall.emit(newRequestOption);
         // Update cache reference
         newInstRes.then((i) => {
-            cacheStore.add(q[0], i[1]);
+            rawJSONCache.add(q[0], [i.rawJSON]);
+            cacheStore.add(q[0], i.instanceList);
             console.log(cacheStore);
         });
 

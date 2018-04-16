@@ -3,7 +3,7 @@ import {action, computed, IObservableArray, observable, reaction} from "mobx";
 import {TagStore} from "../store-domain/tag.store";
 import {Tag} from "../store-domain/tag.class";
 import {IFetchStreamInput} from "../utils/most-fetch";
-import {Article, IArticleAPIOption} from "../store-domain/article.class";
+import {Article, IArticleAPIMetaData, IArticleAPIOption} from "../store-domain/article.class";
 import {create, ISelfEmitStream} from "../utils/most";
 import {SyntheticEvent} from "react";
 import {IArticleStoreSubscribtion} from "../store-domain/article.store";
@@ -45,6 +45,7 @@ export class UIArticleList {
     @observable public pageNumber = 1;
     @observable public requestHash?: string;
     @observable public articleList: IObservableArray<Article> = observable.array([]);
+    @observable public totalArticle: number = 0;
 
     public streamLoadArticle: ISelfEmitStream<IArticleAPIOption> = create("streamLoadArticle");
 
@@ -57,18 +58,19 @@ export class UIArticleList {
 
         this.articleStoreSubscribtion = this.indexStore.articleStore.subscribe();
         this.articleStoreSubscribtion.articleStream.observe((r) => {
+            const rawJSON: IArticleAPIMetaData = r.rawJSON;
             action(() => {
-                this.articleList.replace(r[1]);
+                this.articleList.replace(r.instanceList);
+                this.totalArticle = rawJSON.articlesCount || 0;
             })();
         });
 
         reaction(() => {
-            const o: IArticleAPIOption = {
-                tag: (this.tag || { name: undefined}).name,
+            return {
+                tag: (this.tag || {name: undefined}).name,
                 offset: (this.pageNumber - 1) * this.articlePerPage,
                 limit: this.articlePerPage,
             };
-            return o;
         }, (opts) => {
             this.streamLoadArticle.emit(opts);
         });
@@ -100,14 +102,11 @@ export class UIArticleList {
     }
 
     private articleListInvalidator = (a: Article[], _: IArticleAPIOption): boolean => {
-        if (a.length < this.articlePerPage) {
-            return false;
-        }
-        return true;
+        return a.length >= this.articlePerPage;
     };
 
     @computed get pageCount(): number {
-        return 1;
+        return Math.ceil(this.totalArticle / this.articlePerPage);
     }
 
 }

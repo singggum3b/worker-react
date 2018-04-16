@@ -62,7 +62,6 @@ class ProxyObservable<T> implements Observable<T> {
     }
 
     public emit = (e: T): void => {
-        console.log("emiting", e);
         this.boxed.value = e;
     }
 }
@@ -73,7 +72,7 @@ export interface ISelfEmitStream<T> extends Stream<T> {
 
 export function create<T extends (string | number | boolean | object)>(name: string): ISelfEmitStream<T> {
     const value = new ProxyObservable<T>(name);
-    const stream = from<T>(value).tap(e => console.log("output", e)) as ISelfEmitStream<T>;
+    const stream = from<T>(value) as ISelfEmitStream<T>;
     stream.emit = value.emit;
     return stream;
 }

@@ -26,8 +26,6 @@ export interface IArticleJSON extends OnlyJSON<Article> {
 
 export class Article {
 
-    public static globalInstanceMap = new Map<Article["id"], Article>();
-
     public static fromJSON(json: IArticleJSON): Article {
         const exist = this.globalInstanceMap.get(json.slug);
         if (exist) {
@@ -39,9 +37,7 @@ export class Article {
         }
     }
 
-    public get id(): string {
-        return this.slug;
-    }
+    private static globalInstanceMap = new Map<Article["id"], Article>();
 
     public slug: string = "";
     public title: string = "";
@@ -54,6 +50,12 @@ export class Article {
     public favoritesCount: number = 0;
     public author: Author = new Author();
 
+    public get id(): string {
+        return this.slug;
+    }
+
+    private constructor() {}
+
     public fromJSON(s: IArticleJSON): this {
         const { createdAt, updatedAt, author, ...rest } = s;
         copyFields<Article>(this, rest);
@@ -61,5 +63,9 @@ export class Article {
         this.updatedAt = new Date(updatedAt);
         this.author.fromJSON(s.author);
         return this;
+    }
+
+    public remove(): void {
+        Article.globalInstanceMap.delete(this.id);
     }
 }

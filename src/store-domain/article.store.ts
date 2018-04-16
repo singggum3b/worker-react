@@ -1,28 +1,24 @@
 import {IndexStore} from "../store-ui";
-import {IFetchStreamInput, requestHash} from "../utils/most-fetch";
+import {IFetchStreamInput} from "../utils/most-fetch";
 import {ISelfEmitStream} from "../utils/most";
-import {fromPromise, Stream} from "most";
-import {action, observable, ObservableMap} from "mobx";
-import {Article, IArticleAPIJSONMultiple, IArticleAPIMetaData, IArticleAPIOption, IArticleJSON} from "./article.class";
-import {CacheInvalidator, resourceFactory} from "../utils/most-resource";
+import {Stream} from "most";
+import {action} from "mobx";
+import {Article, IArticleAPIJSONMultiple, IArticleAPIOption, IArticleJSON} from "./article.class";
+import {CacheInvalidator, IResourceOutput, resourceFactory} from "../utils/most-resource";
 
 type LoadArticleSignature = (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>) => any;
 
 export interface IArticleStoreSubscribtion {
     loadArticle: LoadArticleSignature,
     unsubscribe: () => void,
-    articleStream: Stream<[IArticleAPIOption, Article[]]>,
+    articleStream: Stream<IResourceOutput<Article, IArticleAPIOption>>,
 }
 
 export class ArticleStore {
 
-    public readonly articlesList = new WeakMap<IArticleAPIOption, Article[]>();
-
     public store: IndexStore;
-    public metaData: ObservableMap<requestHash, IArticleAPIMetaData>
-        = observable.map(undefined, { deep: false });
 
-    private streamArticleInstance: Stream<Promise<[IArticleAPIOption, Article[]]>>;
+    private streamArticleInstance: Stream<Promise<IResourceOutput<Article, IArticleAPIOption>>>;
     private streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
 
     constructor(store: IndexStore) {
@@ -49,7 +45,6 @@ export class ArticleStore {
         });
         this.streamArticleQuery = queryStream;
         this.streamArticleInstance = resourceStream.multicast();
-        this.streamArticleInstance.chain(fromPromise).forEach((x) => console.log(x));
     }
 
     public processJSON(json: IArticleAPIJSONMultiple): IArticleJSON[] {
@@ -63,7 +58,7 @@ export class ArticleStore {
 
         return {
             articleStream: this.streamArticleInstance.awaitPromises().filter((x) => {
-                return x[0] === currentOption;
+                return x.query === currentOption;
             }),
             loadArticle: (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void => {
                 currentOption = opts;
