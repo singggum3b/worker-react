@@ -1,4 +1,5 @@
 import {copyFields} from "../utils/tools";
+import {IndexStore} from "../store-ui";
 
 export interface IUserLogin {
     user: {
@@ -7,14 +8,28 @@ export interface IUserLogin {
     }
 }
 
-export interface IUserJSON extends OnlyJSON<User> {}
+export interface IUserJSON {
+    user: OnlyJSON<User>,
+}
 
 export class UserStore {
 
+    public store: IndexStore;
     public user?: User;
 
-    public login(i: IUserLogin): void {
+    constructor(s: IndexStore) {
+        this.store = s;
+    }
 
+    public async login(i: IUserLogin): Promise<User> {
+        const userJSON: IUserJSON = await fetch("/api/users/login", {
+            method: "POST",
+            body: JSON.stringify(i),
+            headers: {
+                "content-type": "application/json",
+            },
+        }).then(res => res.json());
+        return new User().fromJSON(userJSON);
     }
 }
 
@@ -25,9 +40,7 @@ export class User {
     public bio: string = "";
     public image?: string;
 
-    private constructor() {}
-
     public fromJSON(u: IUserJSON): User {
-        return copyFields<User>(this, u);
+        return copyFields<User>(this, u.user);
     }
 }

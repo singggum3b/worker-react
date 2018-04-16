@@ -1,11 +1,23 @@
 import * as React from "react";
 import {IndexStore} from "../../store-ui";
+import {computed} from "mobx";
+import {UILoginForm} from "../../store-ui/ui-login-form";
+import {observer} from "mobx-react";
 
 interface IProps {
     store: IndexStore,
 }
 
+@observer
 export class SigninPage extends React.Component<IProps> {
+
+    constructor(p: IProps) {
+        super(p);
+    }
+
+    @computed get uiLoginForm(): UILoginForm {
+        return this.props.store.uiStore.uiLoginForm;
+    }
 
     public render(): React.ReactNode {
         return (
@@ -25,15 +37,28 @@ export class SigninPage extends React.Component<IProps> {
 
                             <form>
                                 <fieldset className="form-group">
-                                    <input className="form-control form-control-lg" type="text" placeholder="Your Name" />
+                                    <input
+                                        value={this.uiLoginForm.email}
+                                        onChange={this.uiLoginForm.setEmail}
+                                        className="form-control form-control-lg"
+                                        type="text"
+                                        placeholder="Email"
+                                    />
                                 </fieldset>
                                 <fieldset className="form-group">
-                                    <input className="form-control form-control-lg" type="text" placeholder="Email" />
+                                    <input
+                                        value={this.uiLoginForm.password}
+                                        onChange={this.uiLoginForm.setPassword}
+                                        className="form-control form-control-lg"
+                                        type="password"
+                                        placeholder="Password"
+                                    />
                                 </fieldset>
-                                <fieldset className="form-group">
-                                    <input className="form-control form-control-lg" type="password" placeholder="Password" />
-                                </fieldset>
-                                <button className="btn btn-lg btn-primary pull-xs-right">
+                                <button
+                                    type="button"
+                                    onClick={this.uiLoginForm.login}
+                                    className="btn btn-lg btn-primary pull-xs-right"
+                                >
                                     Sign up
                                 </button>
                             </form>

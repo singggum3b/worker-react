@@ -3,6 +3,8 @@ import {UIArticleList, UITag, UITagList} from "./ui-model";
 import { History } from "history";
 import {TagStore} from "../store-domain/tag.store";
 import {ArticleStore} from "../store-domain/article.store";
+import {UserStore} from "../store-domain/user.store";
+import {UILoginForm} from "./ui-login-form";
 
 export class BaseStore {
     public indexStore: IndexStore;
@@ -14,6 +16,8 @@ export class BaseStore {
 
 export class IndexStore {
     public uiStore: UIStore;
+
+    public userStore: UserStore;
     public tagStore: TagStore;
     public articleStore: ArticleStore;
 
@@ -22,6 +26,7 @@ export class IndexStore {
 
     constructor(history: History) {
         this.history = history;
+        this.userStore = new UserStore(this);
         this.tagStore = new TagStore(this);
         this.articleStore = new ArticleStore(this);
         this.routerStore = new RouterStore(this);
@@ -35,6 +40,7 @@ export class UIStore extends BaseStore {
     @observable public tagList = new UITagList(this.indexStore);
     @observable public articleList = new UIArticleList(this.indexStore);
     @observable public articleList2 = new UIArticleList(this.indexStore);
+    @observable public uiLoginForm = new UILoginForm(this.indexStore);
 
     constructor(indexStore: IndexStore) {
         super(indexStore);
