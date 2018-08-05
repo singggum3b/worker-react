@@ -1,10 +1,11 @@
-import {IndexStore} from "../store-ui";
-import {IFetchStreamInput} from "../utils/most-fetch";
-import {ISelfEmitStream} from "../utils/most";
-import {Stream} from "most";
-import {action} from "mobx";
-import {Article, IArticleAPIJSONMultiple, IArticleAPIOption, IArticleJSON} from "./article.class";
+import {Inject, Service} from "typedi";
+import {InstanceService, InstanceClassType} from "./instance.service";
 import {CacheInvalidator, IResourceOutput, resourceFactory} from "../utils/most-resource";
+import {Article, IArticleAPIJSONMultiple, IArticleAPIOption, IArticleJSON} from "../store-domain/article.class";
+import {IFetchStreamInput} from "../utils/most-fetch";
+import {Stream} from "most";
+import {ISelfEmitStream} from "../utils/most";
+import {action} from "mobx";
 
 type LoadArticleSignature = (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>) => any;
 
@@ -14,16 +15,16 @@ export interface IArticleStoreSubscribtion {
     articleStream: Stream<IResourceOutput<Article, IArticleAPIOption>>,
 }
 
-export class ArticleStore {
+@Service()
+export class ArticleService {
 
-    public store: IndexStore;
+    @Inject()
+    private instanceService!: InstanceService;
 
     private streamArticleInstance: Stream<Promise<IResourceOutput<Article, IArticleAPIOption>>>;
     private streamArticleQuery: ISelfEmitStream<[IArticleAPIOption, CacheInvalidator<Article, IArticleAPIOption>]>;
 
-    constructor(store: IndexStore) {
-        this.store = store;
-
+    constructor() {
         const {
             resourceStream,
             queryStream,
@@ -31,7 +32,7 @@ export class ArticleStore {
             name: "Article",
             model: Article,
             fromJSON: (json: IArticleJSON): Article => {
-                return Article.fromJSON(json, store.articleStore);
+                return this.instanceService.getUniqueInstance(Article, json.slug).fromJSON(json);
             },
             processJSON: this.processJSON,
             queryToRequest: (opts: IArticleAPIOption): IFetchStreamInput => {
@@ -60,9 +61,11 @@ export class ArticleStore {
         let currentOption: IArticleAPIOption | null;
 
         return {
-            articleStream: this.streamArticleInstance.awaitPromises().filter((x) => {
-                return x.query === currentOption;
-            }),
+            articleStream: this.streamArticleInstance
+                .awaitPromises()
+                .filter((x) => {
+                    return x.query === currentOption;
+                }),
             loadArticle: (opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void => {
                 currentOption = opts;
                 loadArticle(opts, c);
@@ -73,8 +76,14 @@ export class ArticleStore {
         }
     }
 
+    public getUIModel<T>(Model: InstanceClassType<T>, id: string): T {
+        const model = this.instanceService.getUniqueInstance(Model, id);
+        return model;
+    }
+
     @action.bound
     private loadArticle(opts: IArticleAPIOption, c: CacheInvalidator<Article, IArticleAPIOption>): void {
         this.streamArticleQuery.emit([opts, c]);
     }
+
 }

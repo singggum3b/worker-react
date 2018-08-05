@@ -1,6 +1,6 @@
 import {Author, IAuthorJSON} from "./author.class";
 import {copyFields} from "../utils/tools";
-import {ArticleStore} from "./article.store";
+import {Omit} from "react-router";
 
 export type IArticleAPIOption = { // tslint:disable-line
     tag?: string,
@@ -19,26 +19,13 @@ export interface IArticleAPIMetaData {
     articlesCount?: number,
 }
 
-export interface IArticleJSON extends OnlyJSON<Article> {
+export interface IArticleJSON extends OnlyJSON<Omit<Article, "id">> {
     createdAt: string;
     updatedAt: string;
     author: IAuthorJSON;
 }
 
 export class Article {
-
-    public static fromJSON(json: IArticleJSON, s: ArticleStore): Article {
-        const exist = this.globalInstanceMap.get(json.slug);
-        if (exist) {
-            return exist.fromJSON(json);
-        } else {
-            const newInstance = new Article(s).fromJSON(json);
-            Article.globalInstanceMap.set(newInstance.id, newInstance);
-            return newInstance;
-        }
-    }
-
-    private static globalInstanceMap = new Map<Article["id"], Article>();
 
     public slug: string = "";
     public title: string = "";
@@ -51,14 +38,8 @@ export class Article {
     public favoritesCount: number = 0;
     public author: Author = new Author();
 
-    public store: ArticleStore;
-
     public get id(): string {
         return this.slug;
-    }
-
-    private constructor(store: ArticleStore) {
-        this.store = store;
     }
 
     public fromJSON(s: IArticleJSON): this {
@@ -71,6 +52,5 @@ export class Article {
     }
 
     public remove = (): void => {
-        Article.globalInstanceMap.delete(this.id);
     }
 }

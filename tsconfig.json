@@ -12,7 +12,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "strict": true
+    "strict": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": [
     "node_modules",

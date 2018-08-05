@@ -4,7 +4,7 @@ import * as objHash from "object-hash";
 import {apiCallStreamFactory, IFetchStreamInput, requestHash} from "./most-fetch";
 
 interface IClassType<T> {
-    fromJSON: (json: any, ...arg: any[]) => T;
+    new(...args: any[]): T;
 }
 
 interface IModel<T> {
@@ -25,7 +25,7 @@ interface IResourceFactoryOption<T extends IModel<T>, K extends IQuery> {
     rawProvider?: IRawJSONProvider,
     queryToRequest: (i: K) => IFetchStreamInput,
     processJSON(json: any): any[],
-    fromJSON?(json: any, ...arg: any[]): T,
+    fromJSON(json: any, ...arg: any[]): T,
 }
 
 interface IRawJSONProvider {
@@ -134,6 +134,8 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
         }
 
         const newRequestOption = opts.queryToRequest(q[0]) as any;
+        newRequestOption.time = Date.now();
+        Object.seal(newRequestOption);
         const newRawRes = requestStream.filter(r => {
             return r[2] === newRequestOption;
         });
@@ -142,7 +144,7 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
             .awaitPromises()
             .map((json: any) => {
                 const instanceList = opts.processJSON(json).map((jsonItem: any) => {
-                    return opts.fromJSON ? opts.fromJSON(jsonItem) : opts.model.fromJSON(jsonItem);
+                    return opts.fromJSON(jsonItem);
                 });
                 return [instanceList, json];
             })
@@ -163,7 +165,6 @@ export function resourceFactory<T extends IModel<T>, K extends IQuery>(opts: IRe
         newInstRes.then((i) => {
             rawJSONCache.add(q[0], [i.rawJSON]);
             cacheStore.add(q[0], i.instanceList);
-            console.log(cacheStore);
         });
 
         return newInstRes;

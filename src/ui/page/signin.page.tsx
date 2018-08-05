@@ -1,11 +1,10 @@
 import * as React from "react";
-import {IndexStore} from "../../store-ui";
 import {computed} from "mobx";
 import {UILoginForm} from "../../store-ui/ui-login-form";
 import {observer} from "mobx-react";
 
 interface IProps {
-    store: IndexStore,
+    // store: IndexStore,
 }
 
 @observer
@@ -16,7 +15,7 @@ export class SigninPage extends React.Component<IProps> {
     }
 
     @computed get uiLoginForm(): UILoginForm {
-        return this.props.store.uiStore.uiLoginForm;
+        return {} as any;
     }
 
     public render(): React.ReactNode {

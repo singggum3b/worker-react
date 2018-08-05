@@ -6,7 +6,8 @@ import {IFetchStreamInput} from "../utils/most-fetch";
 import {Article, IArticleAPIMetaData, IArticleAPIOption} from "../store-domain/article.class";
 import {create, ISelfEmitStream} from "../utils/most";
 import {SyntheticEvent} from "react";
-import {IArticleStoreSubscribtion} from "../store-domain/article.store";
+import {Container} from "typedi";
+import {ArticleService, IArticleStoreSubscribtion} from "../services/article.service";
 
 export class UITagList {
 
@@ -39,7 +40,6 @@ export class UITagList {
 
 export class UIArticleList {
 
-    public indexStore: IndexStore;
     public readonly articlePerPage = 10;
     @observable.ref public tag?: Tag;
     @observable public pageNumber = 1;
@@ -49,14 +49,15 @@ export class UIArticleList {
 
     public streamLoadArticle: ISelfEmitStream<IArticleAPIOption> = create("streamLoadArticle");
 
-    public uiPagination: UIArticleListPagination;
+    public uiPagination: UIArticleListPagination = new UIArticleListPagination(this);
+
+    private articleService = Container.get(ArticleService);
 
     private articleStoreSubscribtion: IArticleStoreSubscribtion;
 
-    constructor(indexStore: IndexStore) {
-        this.indexStore = indexStore;
+    constructor() {
 
-        this.articleStoreSubscribtion = this.indexStore.articleStore.subscribe();
+        this.articleStoreSubscribtion = this.articleService.subscribe();
         this.articleStoreSubscribtion.articleStream.observe((r) => {
             const rawJSON: IArticleAPIMetaData = r.rawJSON;
             action(() => {
@@ -79,7 +80,6 @@ export class UIArticleList {
             this.articleStoreSubscribtion.loadArticle(opts, this.articleListInvalidator);
         }));
 
-        this.uiPagination = new UIArticleListPagination(this);
     }
 
     @action.bound

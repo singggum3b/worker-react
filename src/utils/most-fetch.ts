@@ -71,7 +71,7 @@ export function apiCallStreamFactory(
     const pendingSeed: IPendingRequestSeed[]  = [];
 
     const urlStream = (opts.skipRepeat ? src.skipRepeatsWith(compareFetchInput) : src);
-    const reqStream: Stream<IPendingRequestSeed> = urlStream.map((url) => {
+    const reqStream: Stream<IPendingRequestSeed> = urlStream.map((url: IFetchStreamInput) => {
 
         const rHash = opts.requestHasher ? opts.requestHasher(url) : undefined;
         const cached = pendingSeed.find(s => compareFetchInput(s.url, url));
@@ -91,7 +91,9 @@ export function apiCallStreamFactory(
         if (opts.useCache && opts.requestHasher) {
             const hash = opts.requestHasher(url);
             if (requestCache[hash]) {
-                r = requestCache[hash];
+                r = requestCache[hash].then((c: [IFetchStreamInput, Response, requestHash]) => {
+                    return [url, c[1], c[2]] as [IFetchStreamInput, Response, requestHash]
+                });
             } else {
                 r = fetchCall(url, rHash || undefined);
                 requestCache[hash] = r;

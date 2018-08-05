@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {configure, spy} from "mobx";
 import { UI } from "./ui";
 
